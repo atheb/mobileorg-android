@@ -29,7 +29,7 @@ public class OutlineListView extends ListView {
 		setOnItemClickListener(outlineClickListener);
 		setOnItemLongClickListener(outlineLongClickListener);
 		this.actionMode = new OutlineActionMode(context);
-		setAdapter(new OutlineAdapter(context));
+		setAdapter(new OutlineAdapter(context, true));
 	}
 	
 	

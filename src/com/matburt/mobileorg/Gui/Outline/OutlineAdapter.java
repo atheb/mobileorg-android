@@ -18,15 +18,16 @@ import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 
 	private ContentResolver resolver;
+	private boolean useLevelFormating = true;
 	
 	private ArrayList<Boolean> expanded = new ArrayList<Boolean>();
 
 	private DefaultTheme theme;
 	
-	public OutlineAdapter(Context context) {
+	public OutlineAdapter(Context context, boolean useLevelFormating) {
 		super(context, R.layout.outline_item);
 		this.resolver = context.getContentResolver();
-
+		this.useLevelFormating = useLevelFormating;
 		this.theme = DefaultTheme.getTheme(context);
 		init();
 	}
@@ -94,7 +95,7 @@ public class OutlineAdapter extends ArrayAdapter<OrgNode> {
 		if (convertView == null)
 			outlineItem = new OutlineItem(getContext());
 
-		outlineItem.setup(getItem(position), this.expanded.get(position), theme, resolver);
+		outlineItem.setup(getItem(position), this.expanded.get(position), theme, useLevelFormating, resolver);
 		return outlineItem;
 	}
 

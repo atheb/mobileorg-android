@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.Toast;
 
@@ -17,6 +19,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Agenda.AgendaFragment;
 import com.matburt.mobileorg.Gui.Outline.OutlineFragment;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
@@ -56,6 +59,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		this.outlineFragment = (OutlineFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.outlineFragment);
 		refreshDisplay();
+		showAgenda();
 	}
 
 	
@@ -134,6 +138,18 @@ public class MainActivity extends SherlockFragmentActivity {
 			return true;
 		}
 		return false;
+	}
+	
+	private void showAgenda() {
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+		transaction.hide(outlineFragment);
+		
+		Fragment agendaFragment = new AgendaFragment();
+		transaction.add(R.id.main_main, agendaFragment, "agendaFragment");
+		transaction.show(agendaFragment);
+		
+		transaction.commit();
 	}
 
 	public void runHelp(View view) {

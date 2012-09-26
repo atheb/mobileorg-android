@@ -134,4 +134,8 @@ public class OrgDatabase extends SQLiteOpenHelper {
 		getWritableDatabase().setTransactionSuccessful();
 		getWritableDatabase().endTransaction();
 	}
+	
+	public SQLiteDatabase getReadadbleDatabase() {
+		return getReadableDatabase();
+	}
 }
