@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
 import com.matburt.mobileorg.Gui.Outline.OutlineListView;
@@ -15,7 +15,7 @@ import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class SearchActivity extends SherlockActivity {
+public class SearchActivity extends SherlockFragmentActivity {
 
 	private OutlineListView listView;
 	private OutlineAdapter listAdapter;

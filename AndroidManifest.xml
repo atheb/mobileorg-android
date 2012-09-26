@@ -63,7 +63,7 @@
         </receiver>
 
         <activity
-            android:name=".Gui.Outline.OutlineActivity"
+            android:name=".Gui.MainActivity"
             android:label="MobileOrg" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

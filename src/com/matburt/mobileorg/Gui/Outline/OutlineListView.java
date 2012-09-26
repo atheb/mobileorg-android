@@ -7,14 +7,14 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.ActionMode;
 import com.matburt.mobileorg.OrgData.OrgNode;
 
 public class OutlineListView extends ListView {
 
 	private Context context;
-	private SherlockActivity activity;
+	private SherlockFragmentActivity activity;
 	private ContentResolver resolver;
 
 	private OutlineAdapter adapter;
@@ -39,9 +39,9 @@ public class OutlineListView extends ListView {
 	}
 
 
-	public void setActivity(SherlockActivity activity) {
-		this.activity = activity;
-		this.context = activity;
+	public void setActivity(SherlockFragmentActivity sherlockFragmentActivity) {
+		this.activity = sherlockFragmentActivity;
+		this.context = sherlockFragmentActivity;
 	}
 
 	public long[] getState() {

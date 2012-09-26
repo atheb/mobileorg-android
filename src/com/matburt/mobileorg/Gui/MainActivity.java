@@ -1,4 +1,4 @@
-package com.matburt.mobileorg.Gui.Outline;
+package com.matburt.mobileorg.Gui;
 
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -11,12 +11,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Outline.OutlineFragment;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
 import com.matburt.mobileorg.Settings.SettingsActivity;
@@ -24,19 +25,15 @@ import com.matburt.mobileorg.Settings.WizardActivity;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.util.OrgUtils;
 
-public class OutlineActivity extends SherlockActivity {
-
+public class MainActivity extends SherlockFragmentActivity {
 	public final static String NODE_ID = "node_id";
-	private final static String OUTLINE_NODES = "nodes";
-	private final static String OUTLINE_CHECKED_POS = "selection";
-	private final static String OUTLINE_SCROLL_POS = "scrollPosition";
 
 	private Long node_id;
-		
-	private OutlineListView listView;
 
 	private SynchServiceReceiver syncReceiver;
 	private MenuItem synchronizerMenuItem;
+
+	private OutlineFragment outlineFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,52 +41,23 @@ public class OutlineActivity extends SherlockActivity {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_PROGRESS);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-		setContentView(R.layout.outline);
+		setContentView(R.layout.main);
 				
 		Intent intent = getIntent();
 		node_id = intent.getLongExtra(NODE_ID, -1);
 
 		if (this.node_id == -1)
 			displayNewUserDialogs();
-		setupList();
 
 		this.syncReceiver = new SynchServiceReceiver();
 		registerReceiver(this.syncReceiver, new IntentFilter(
 				Synchronizer.SYNC_UPDATE));
 		
+		this.outlineFragment = (OutlineFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.outlineFragment);
 		refreshDisplay();
 	}
-	
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putLongArray(OUTLINE_NODES, listView.getState());
-		outState.putInt(OUTLINE_CHECKED_POS, listView.getCheckedItemPosition());
-		outState.putInt(OUTLINE_SCROLL_POS, listView.getFirstVisiblePosition());
-	}
 
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-		
-		long[] state = savedInstanceState.getLongArray(OUTLINE_NODES);
-		if(state != null)
-			listView.setState(state);
-		
-		int checkedPos= savedInstanceState.getInt(OUTLINE_CHECKED_POS, 0);
-		listView.setItemChecked(checkedPos, true);
-		
-		int scrollPos = savedInstanceState.getInt(OUTLINE_SCROLL_POS, 0);
-		listView.setSelection(scrollPos);
-	}
-	
-
-
-	private void setupList() {
-		listView = (OutlineListView) findViewById(R.id.outline_list);
-		listView.setActivity(this);
-		listView.setEmptyView(findViewById(R.id.outline_list_empty));
-	}
 	
 	private void displayNewUserDialogs() {
 		if (OrgUtils.isSyncConfigured(this) == false)
@@ -112,7 +80,7 @@ public class OutlineActivity extends SherlockActivity {
 	}
 		
 	public void refreshDisplay() {
-		this.listView.refresh();
+		outlineFragment.refresh();
 		refreshTitle();
 	}
 	
@@ -132,7 +100,7 @@ public class OutlineActivity extends SherlockActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getSupportMenuInflater();
-	    inflater.inflate(R.menu.outline_menu, menu);
+	    inflater.inflate(R.menu.main, menu);
 	    
 	    synchronizerMenuItem = menu.findItem(R.id.menu_sync);
 	    
@@ -143,7 +111,7 @@ public class OutlineActivity extends SherlockActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			listView.collapseCurrent();
+			outlineFragment.collapseCurrent();
 			return true;
 			
 		case R.id.menu_sync:
@@ -156,10 +124,6 @@ public class OutlineActivity extends SherlockActivity {
 
 		case R.id.menu_outline:
 			runExpandableOutline(-1);
-			return true;
-
-		case R.id.menu_capturechild:
-			OutlineActionMode.runCaptureActivity(listView.getCheckedNodeId(), this);
 			return true;
 
 		case R.id.menu_search:
@@ -193,8 +157,8 @@ public class OutlineActivity extends SherlockActivity {
     
     
     private void runExpandableOutline(long id) {
-		Intent intent = new Intent(this, OutlineActivity.class);
-		intent.putExtra(OutlineActivity.NODE_ID, id);
+		Intent intent = new Intent(this, MainActivity.class);
+		intent.putExtra(MainActivity.NODE_ID, id);
 		startActivity(intent);
     }
 

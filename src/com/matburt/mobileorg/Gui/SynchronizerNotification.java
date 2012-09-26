@@ -10,7 +10,6 @@ import android.support.v4.app.NotificationCompat.Builder;
 import android.widget.RemoteViews;
 
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Outline.OutlineActivity;
 
 public class SynchronizerNotification {
 	private NotificationManager notificationManager;
@@ -25,7 +24,7 @@ public class SynchronizerNotification {
 	public void errorNotification(String errorMsg) {
 		this.notificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Intent notifyIntent = new Intent(context, OutlineActivity.class);
+		Intent notifyIntent = new Intent(context, MainActivity.class);
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
 				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
@@ -52,7 +51,7 @@ public class SynchronizerNotification {
 	public void setupNotification() {
 		this.notificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
-		Intent notifyIntent = new Intent(context, OutlineActivity.class);
+		Intent notifyIntent = new Intent(context, MainActivity.class);
 		notifyIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
 				| Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
