@@ -1,30 +1,34 @@
 package com.matburt.mobileorg.Gui.Theme;
 
+import com.matburt.mobileorg.R;
+
+import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
 
 public class WhiteTheme extends DefaultTheme {
 
-	public WhiteTheme() {
-		super();
-		c0Black = Color.rgb(0xff, 0xff, 0xff);
-		c1Red = Color.rgb(0x20, 0x00, 0x00);
-		c2Green = Color.rgb(0x00, 0x20, 0x00);
-		c3Yellow = Color.rgb(0x20, 0x20, 0x00);
-		c4Blue = Color.rgb(0x0, 0x0, 0x20);
-		c5Purple = Color.rgb(0x20, 0x00, 0x20);
-		c6Cyan = Color.rgb(0x00, 0x20, 0x20);
-		c7White = Color.rgb(0x10, 0x10, 0x10);
+	public WhiteTheme(Context context) {
+		super(context);
+		setup(context.getResources());
+	}
+	
+	private void setup(Resources r) {
+		todoActive = Color.rgb(0x20, 0x00, 0x00);
+		todoDone = Color.rgb(0x00, 0x20, 0x00);
+		priority = Color.rgb(0x80, 0x80, 0x00);
+		
+		childIndicator = r.getColor(R.color.black);
 
-		c9LRed = Color.rgb(0xa0, 0x0, 0x0);
-		caLGreen = Color.rgb(0x20, 0xa0, 0x20);
-		cbLYellow = Color.rgb(0x80, 0x80, 0x00);
-		ccLBlue = Color.rgb(0x00, 0x00, 0x80);
-		cdLPurple = Color.rgb(0x80, 0x00, 0x80);
-		ceLCyan = Color.rgb(0x00, 0x80, 0x80);
-		cfLWhite = Color.rgb(0x00, 0x00, 0x00);
+		outline_l1 = Color.rgb(0x00, 0x00, 0x80);
+		outline_l2 = Color.rgb(0xc0, 0x80, 0x00);
+		outline_l3 = Color.rgb(0x00, 0x80, 0x80);
+		outline_l4 = Color.rgb(0x00, 0xa0, 0x00);
+		outline_l5 = Color.rgb(0x20, 0x00, 0x20);
+		outline_l6 = Color.rgb(0x00, 0x00, 0x80);
+		outline_l7 = Color.rgb(0x00, 0xa0, 0x00);
 
-		levelColors = new int[] { ccLBlue, c3Yellow, ceLCyan, c2Green,
-				c5Purple, ccLBlue, c2Green, ccLBlue, c3Yellow, ceLCyan };
-
+		levelColors = new int[] { outline_l1, outline_l2, outline_l3,
+				outline_l4, outline_l5, outline_l6, outline_l7 };
 	}
 }

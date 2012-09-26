@@ -67,7 +67,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 			SpannableStringBuilder titleSpan) {
 		if (node.hasChildren(resolver)) {
 			titleSpan.append("...");
-			titleSpan.setSpan(new ForegroundColorSpan(theme.c7White),
+			titleSpan.setSpan(new ForegroundColorSpan(theme.childIndicator),
 					titleSpan.length() - "...".length(), titleSpan.length(), 0);
 		}
 	}
@@ -78,7 +78,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 			
 			boolean active = OrgProviderUtils.isTodoActive(todo, resolver);
 			
-			todoSpan.setSpan(new ForegroundColorSpan(active ? theme.c1Red : theme.caLGreen), 0,
+			todoSpan.setSpan(new ForegroundColorSpan(active ? theme.todoActive : theme.todoDone), 0,
 					todo.length(), 0);
 			titleSpan.insert(0, todoSpan);
 		}
@@ -87,7 +87,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	public static void setupPriority(String priority, DefaultTheme theme, SpannableStringBuilder titleSpan) {
 		if (priority != null && TextUtils.isEmpty(priority) == false) {
 			Spannable prioritySpan = new SpannableString(priority + " ");
-			prioritySpan.setSpan(new ForegroundColorSpan(theme.c3Yellow), 0,
+			prioritySpan.setSpan(new ForegroundColorSpan(theme.priority), 0,
 					priority.length(), 0);
 			titleSpan.insert(0, prioritySpan);
 		}
@@ -110,10 +110,10 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 		titleView.setGravity(Gravity.LEFT);
 
 		if (name.startsWith("COMMENT"))
-			titleSpan.setSpan(new ForegroundColorSpan(theme.gray), 0,
+			titleSpan.setSpan(new ForegroundColorSpan(theme.inactive), 0,
 					"COMMENT".length(), 0);
 		else if (name.equals("Archive"))
-			titleSpan.setSpan(new ForegroundColorSpan(theme.gray), 0,
+			titleSpan.setSpan(new ForegroundColorSpan(theme.inactive), 0,
 					"Archive".length(), 0);
 		
 		formatLinks(theme, titleSpan);
@@ -122,7 +122,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	public void setupAgendaBlock(SpannableStringBuilder titleSpan, DefaultTheme theme) {
 		titleSpan.delete(0, OrgFileParser.BLOCK_SEPARATOR_PREFIX.length());
 
-		titleSpan.setSpan(new ForegroundColorSpan(theme.c7White), 0,
+		titleSpan.setSpan(new ForegroundColorSpan(theme.agendaBlocks), 0,
 				titleSpan.length(), 0);
 		titleSpan.setSpan(new StyleSpan(Typeface.BOLD), 0,
 				titleSpan.length(), 0);
@@ -142,7 +142,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 			titleSpan.delete(matcher.start(), matcher.end());
 			titleSpan.insert(matcher.start(), matcher.group(1));
 		
-			titleSpan.setSpan(new ForegroundColorSpan(theme.c4Blue),
+			titleSpan.setSpan(new ForegroundColorSpan(theme.url),
 					matcher.start(), matcher.start() + matcher.group(1).length(), 0);	
 			
 			matcher = urlPattern.matcher(titleSpan);
@@ -151,7 +151,7 @@ public class OutlineItem extends RelativeLayout implements Checkable {
 	
 	public void setupTags(String tags, DefaultTheme theme) {
 		if(tags != null && TextUtils.isEmpty(tags) == false) {
-			tagsView.setTextColor(theme.gray);
+			tagsView.setTextColor(theme.tags);
 			tagsView.setText(tags);
 			tagsView.setVisibility(View.VISIBLE);
 		} else

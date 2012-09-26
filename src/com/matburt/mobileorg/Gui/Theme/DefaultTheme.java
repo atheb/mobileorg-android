@@ -1,46 +1,69 @@
 package com.matburt.mobileorg.Gui.Theme;
 
+import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.util.OrgUtils;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.content.res.Resources;
 
 public class DefaultTheme {
+		
+	public int todoActive;
+	public int todoDone;
+	public int priority;
+	public int tags;
 	
-	public int gray = Color.GRAY;
+	public int inactive;
+	public int url;
 	
-	public int c0Black = Color.rgb(0x00, 0x00, 0x00);
-	public int c1Red = Color.rgb(0xd0, 0x00, 0x00);
-	public int c2Green = Color.rgb(0x00, 0xa0, 0x00);
-	public int c3Yellow = Color.rgb(0xc0, 0x80, 0x00);
-	public int c4Blue = Color.rgb(0x22, 0x22, 0xf0);
-	public int c5Purple = Color.rgb(0xa0, 0x00, 0xa0);
-	public int c6Cyan = Color.rgb(0x00, 0x80, 0x80);
-	public int c7White = Color.rgb(0xc0, 0xc0, 0xc0);
-
-	public int c9LRed = Color.rgb(0xff, 0x77, 0x77);
-	public int caLGreen = Color.rgb(0x77, 0xff, 0x77);
-	public int cbLYellow = Color.rgb(0xff, 0xff, 0x00);
-	public int ccLBlue = Color.rgb(0x88, 0x88, 0xff);
-	public int cdLPurple = Color.rgb(0xff, 0x00, 0xff);
-	public int ceLCyan = Color.rgb(0x00, 0xff, 0xff);
-	public int cfLWhite = Color.rgb(0xff, 0xff, 0xff);
-
+	public int childIndicator;
+	
+	public int agendaBlocks;
+	
 	public int[] levelColors;
+	public int outline_l1;
+	public int outline_l2;
+	public int outline_l3;
+	public int outline_l4;
+	public int outline_l5;
+	public int outline_l6;
+	public int outline_l7;
+
 	
-	public DefaultTheme() {
-		levelColors = new int[] { ccLBlue, c3Yellow, ceLCyan, c2Green,
-				c5Purple, ccLBlue, c2Green, ccLBlue, c3Yellow, ceLCyan };
+	public DefaultTheme(Context context) {
+		setup(context.getResources());
+	}
+	
+	private void setup(Resources r) {
+		todoActive = r.getColor(R.color.red);
+		todoDone = r.getColor(R.color.light_green);
+		priority = r.getColor(R.color.yellow);
+		tags = r.getColor(R.color.gray);
+		inactive = r.getColor(R.color.gray);
+		url = r.getColor(R.color.dark_blue);
+		childIndicator = r.getColor(R.color.white);
+		agendaBlocks = r.getColor(R.color.white);
+		
+		outline_l1 = r.getColor(R.color.blue);
+		outline_l2 = r.getColor(R.color.orange);
+		outline_l3 = r.getColor(R.color.cyan);
+		outline_l4 = r.getColor(R.color.dark_green);
+		outline_l5 = r.getColor(R.color.purple);
+		outline_l6 = r.getColor(R.color.blue);
+		outline_l7 = r.getColor(R.color.dark_green);
+
+		levelColors = new int[] { outline_l1, outline_l2, outline_l3, outline_l4,
+				outline_l5, outline_l6, outline_l7 };
 	}
 	
 	
 	public static DefaultTheme getTheme(Context context) {
 		final String themeName = OrgUtils.getThemeName(context);
 		if(themeName.equals("Light"))
-				return new WhiteTheme();
+				return new WhiteTheme(context);
 		else if(themeName.equals("Monochrome"))
-			return new MonoTheme();
+			return new MonoTheme(context);
 		else
-			return new DefaultTheme();
+			return new DefaultTheme(context);
 	}
 }

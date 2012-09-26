@@ -1,28 +1,30 @@
 package com.matburt.mobileorg.Gui.Theme;
 
-import android.graphics.Color;
+import com.matburt.mobileorg.R;
+
+import android.content.Context;
+import android.content.res.Resources;
 
 public class MonoTheme extends DefaultTheme {
-
-	public MonoTheme() {
-		super();
-		c0Black = Color.rgb(0xff, 0xff, 0xff);
-		c1Red = Color.rgb(0xd0, 0x00, 0x00);
-		c2Green = Color.rgb(0x00, 0x00, 0x00);
-		c3Yellow = Color.rgb(0x00, 0x00, 0x00);
-		c4Blue = Color.rgb(0x00, 0x00, 0x00);
-		c5Purple = Color.rgb(0x00, 0x00, 0x00);
-		c6Cyan = Color.rgb(0x00, 0x00, 0x00);
-		c7White = Color.rgb(0x00, 0x00, 0x00);
-
-		c9LRed = Color.rgb(0x00, 0x00, 0x00);
-		caLGreen = Color.rgb(0x77, 0xff, 0x77);
-		cbLYellow = Color.rgb(0x00, 0x00, 0x00);
-		ccLBlue = Color.rgb(0x00, 0x00, 0x00);
-		cdLPurple = Color.rgb(0x00, 0x00, 0x00);
-		ceLCyan = Color.rgb(0x00, 0x00, 0x00);
-		cfLWhite = Color.rgb(0x00, 0x00, 0x00);
+	
+	public MonoTheme(Context context) {
+		super(context);
+		setup(context.getResources());
+	}
+	
+	private void setup(Resources r) {
+		todoDone = r.getColor(R.color.light_green);
+		todoActive = r.getColor(R.color.red);
+		priority = r.getColor(R.color.black);
+		tags = r.getColor(R.color.black);
 		
-		levelColors = new int[] { cfLWhite };
+		inactive = r.getColor(R.color.black);
+		url = r.getColor(R.color.black);
+		childIndicator = r.getColor(R.color.black);
+		agendaBlocks = r.getColor(R.color.black);
+		
+		outline_l1 = r.getColor(R.color.black);
+		
+		levelColors = new int[] { outline_l1 };
 	}
 }
