@@ -1,20 +1,18 @@
 package com.matburt.mobileorg.Gui.Agenda;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -24,12 +22,7 @@ import com.commonsware.cwac.merge.MergeAdapter;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Outline.OutlineActionMode;
 import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
-import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgDatabase;
-import com.matburt.mobileorg.OrgData.OrgDatabase.Tables;
-import com.matburt.mobileorg.OrgData.OrgFile;
-import com.matburt.mobileorg.util.OrgFileNotFoundException;
-import com.matburt.mobileorg.util.SelectionBuilder;
 
 public class AgendaFragment extends SherlockFragment {
 
@@ -47,7 +40,6 @@ public class AgendaFragment extends SherlockFragment {
 		
 		setHasOptionsMenu(true);
 		
-		refresh();
 		return agendaList;
 	}
 	
@@ -60,103 +52,45 @@ public class AgendaFragment extends SherlockFragment {
 		}
 	};
 	
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		refresh();
+	}
+
 	public void refresh() {
 		this.mergeAdapter = new MergeAdapter();
 		setupAgendas();
 		this.agendaList.setAdapter(mergeAdapter);
 	}
 
-	private void setupAgendas() {
-		ArrayList<String> files = new ArrayList<String>();
-		files.add("GTD.org");		
-		addAgenda("Home", getQuery("TODO", "Home", null, null, files, true));
-		addAgenda("Online", getQuery("TODO", "Online", null, null, files, true));
-		addAgenda("Urgent", getQuery(null, null, "A", null, files, true));
-		addAgenda("Habits", getQuery("TODO", null, null, ":STYLE: habit", files, false));
+	private void setupAgendas() {	
+		try {
+			ArrayList<AgendaQuery> agendas = AgendaQuery.read(getActivity());
+			
+			for(AgendaQuery agenda: agendas)
+				addAgenda(agenda);
+		} catch (IOException e) {}
 	}
 	
-	public void addAgenda(String title, SelectionBuilder query) {
+	public void addAgenda(AgendaQuery query) {
 		TextView titleView = (TextView) View.inflate(getActivity(), R.layout.agenda_header, null);
-		titleView.setText(title);
+		titleView.setText(query.title);
 		mergeAdapter.addView(titleView);
 
 		OutlineAdapter adapter = new OutlineAdapter(getActivity(), false);
-		adapter.setState(getNodes(query));
+		adapter.setState(query.getNodes(db, getActivity()));
 		mergeAdapter.addAdapter(adapter);
 	}
 	
-	private long[] getNodes(SelectionBuilder query) {
-		long[] result = null;
-		
-		Cursor cursor = query.query(db, OrgData.DEFAULT_COLUMNS, OrgData.DEFAULT_SORT);
-		
-		result = new long[cursor.getCount()];
-		cursor.moveToFirst();
-		
-		int i = 0;
-		while(cursor.isAfterLast() == false) {
-			result[i++] = cursor.getLong(cursor.getColumnIndex(OrgData.ID));
-			cursor.moveToNext();
-		}
-		cursor.close();
-		return result;
-	}
-	
-	private SelectionBuilder getQuery(String todo, String tag, String priority, String payload, ArrayList<String> filenames, boolean notHabit) {
-		final SelectionBuilder builder = new SelectionBuilder();
-		builder.table(Tables.ORGDATA);
-		
-		if(filenames == null || filenames.size() == 0)
-			builder.where("NOT " + OrgData.FILE_ID + "=?", Long.toString(getFileId(OrgFile.AGENDA_FILE)));
-		else
-			builder.where(getFileSelection(filenames));
-		
-		if(todo != null && !TextUtils.isEmpty(todo))
-			builder.where(OrgData.TODO + "=?", todo);
-		
-		if(tag != null && !TextUtils.isEmpty(tag))
-			builder.where(OrgData.TAGS + " LIKE ?", "%" + tag+ "%");
-		
-		if(priority != null && !TextUtils.isEmpty(priority))
-			builder.where(OrgData.PRIORITY + "=?", priority);		
-		
-		if(payload != null && !TextUtils.isEmpty(payload))
-			builder.where(OrgData.PAYLOAD + " LIKE ?", "%" + payload+ "%");
-		
-		if(notHabit)
-			builder.where("NOT " + OrgData.PAYLOAD + " LIKE ?", "'%:STYLE: habit%'");
-		
-		return builder;
-	}
-	
-	private String getFileSelection(ArrayList<String> filenames) {
-		StringBuilder builder = new StringBuilder();
-		
-		if(filenames == null)
-			return "";
-		
-		for (String filename: filenames) {
-			long fileId = getFileId(filename);
-			builder.append(OrgData.FILE_ID + "=" + Long.toString(fileId)).append(" OR ");
-		}
-		
-		builder.delete(builder.length() - " OR ".length(), builder.length() - 1);
-		Log.d("MobileOrg", "Generated file query: " + builder.toString());
-		return builder.toString();
-	}
-	
-	private long getFileId(String filename) {
-		try {
-			OrgFile agendaFile = new OrgFile(filename, getActivity().getContentResolver());
-			return agendaFile.id;
-		} catch (OrgFileNotFoundException e) { return -1;}
-	}
 
 	@Override
 	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 		super.onCreateOptionsMenu(menu, inflater);
 		
 		MenuItem item = menu.add("Agenda settings");
+		item.setIcon(R.drawable.ic_menu_preferences);
 		item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 	}
 
@@ -170,6 +104,4 @@ public class AgendaFragment extends SherlockFragment {
 		else
 			return super.onOptionsItemSelected(item);
 	}
-	
-	
 }

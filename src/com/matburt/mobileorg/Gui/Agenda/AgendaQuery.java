@@ -1,19 +1,28 @@
 package com.matburt.mobileorg.Gui.Agenda;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgDatabase.Tables;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
+import com.matburt.mobileorg.util.OrgUtils;
 import com.matburt.mobileorg.util.SelectionBuilder;
 
 public class AgendaQuery implements Serializable {
-	private static final long serialVersionUID = -4394643013089958133L;
+	private static final long serialVersionUID = 1;
+	private static final String AGENDA_CONFIG_FILE = "agendas.conf";
+	
+	public String title = "";
 	
 	public ArrayList<String> files = new ArrayList<String>();
 	public ArrayList<String> todos = new ArrayList<String>();
@@ -21,11 +30,31 @@ public class AgendaQuery implements Serializable {
 	public ArrayList<String> priorities = new ArrayList<String>();
 	public ArrayList<String> payloads = new ArrayList<String>();
 
-	public boolean includeHabits = true;
+	public boolean filterHabits = false;
 	public boolean activeTodos = false;
 	
+	public AgendaQuery(String title) {
+		this.title = title;
+	}
 	
-	public SelectionBuilder getQuery(Context context) {
+	public long[] getNodes(SQLiteDatabase db, Context context) {
+		long[] result = null;
+		
+		Cursor cursor = getQuery(context).query(db, OrgData.DEFAULT_COLUMNS, OrgData.DEFAULT_SORT);
+		
+		result = new long[cursor.getCount()];
+		cursor.moveToFirst();
+		
+		int i = 0;
+		while(cursor.isAfterLast() == false) {
+			result[i++] = cursor.getLong(cursor.getColumnIndex(OrgData.ID));
+			cursor.moveToNext();
+		}
+		cursor.close();
+		return result;
+	}
+	
+	private SelectionBuilder getQuery(Context context) {
 		final SelectionBuilder builder = new SelectionBuilder();
 		builder.table(Tables.ORGDATA);
 
@@ -43,7 +72,7 @@ public class AgendaQuery implements Serializable {
 		if(payloads != null && payloads.size() > 0)
 			builder.where(getLikeSelection(payloads, OrgData.PAYLOAD));
 		
-		if(includeHabits)
+		if(filterHabits)
 			builder.where("NOT " + OrgData.PAYLOAD + " LIKE ?", "'%:STYLE: habit%'");
 		
 		return builder;
@@ -70,7 +99,7 @@ public class AgendaQuery implements Serializable {
 			return "";
 		
 		for (String value: values) {
-			builder.append(column + "=" + value).append(" OR ");
+			builder.append(column + "='" + value + "'").append(" OR ");
 		}
 		
 		builder.delete(builder.length() - " OR ".length(), builder.length() - 1);
@@ -78,10 +107,12 @@ public class AgendaQuery implements Serializable {
 	}
 	
 	private void getFileSelection(SelectionBuilder builder, Context context) {		
-		if(files == null || files.size() == 0)
+		if(files == null || files.size() == 0) {
 			builder.where("NOT " + OrgData.FILE_ID + "=?",
 					Long.toString(getFileId(OrgFile.AGENDA_FILE,
 							context.getContentResolver())));
+			return;
+		}
 		
 		StringBuilder stringBuilder = new StringBuilder();
 		for (String filename: files) {
@@ -99,4 +130,24 @@ public class AgendaQuery implements Serializable {
 			return agendaFile.id;
 		} catch (OrgFileNotFoundException e) { return -1;}
 	}
+	
+
+	public static void write(ArrayList<AgendaQuery> queries, Context context) throws IOException {
+		byte[] serializeObject = OrgUtils.serializeObject(queries);
+		FileOutputStream fos = context.openFileOutput(AGENDA_CONFIG_FILE, Context.MODE_PRIVATE);
+		fos.write(serializeObject);
+		fos.close();
+	}
+	
+	public static ArrayList<AgendaQuery> read(Context context) throws IOException {
+		FileInputStream fis = context.openFileInput(AGENDA_CONFIG_FILE);
+		byte[] serializedObject = new byte[fis.available()];
+		fis.read(serializedObject);
+		fis.close();
+		
+		@SuppressWarnings("unchecked")
+		ArrayList<AgendaQuery> result = (ArrayList<AgendaQuery>) OrgUtils
+				.deserializeObject(serializedObject);
+		return result;
+	}	
 }
