@@ -44,12 +44,12 @@ public class DefaultTheme {
 		childIndicator = r.getColor(R.color.white);
 		agendaBlocks = r.getColor(R.color.white);
 		
-		outline_l1 = r.getColor(R.color.blue);
+		outline_l1 = r.getColor(R.color.light_blue);
 		outline_l2 = r.getColor(R.color.orange);
 		outline_l3 = r.getColor(R.color.cyan);
 		outline_l4 = r.getColor(R.color.dark_green);
 		outline_l5 = r.getColor(R.color.purple);
-		outline_l6 = r.getColor(R.color.blue);
+		outline_l6 = r.getColor(R.color.light_blue);
 		outline_l7 = r.getColor(R.color.dark_green);
 
 		levelColors = new int[] { outline_l1, outline_l2, outline_l3, outline_l4,
