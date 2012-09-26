@@ -1,9 +1,12 @@
 package com.matburt.mobileorg.Gui.Agenda;
 
+import java.util.ArrayList;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,8 +58,14 @@ public class AgendaFragment extends SherlockFragment {
 	};
 
 	private void setupAgendas() {
-		addAgenda("Home", getQuery("TODO", "Home"));
-		addAgenda("Online", getQuery("TODO", "Online"));
+		ArrayList<String> files = new ArrayList<String>();
+		files.add("GTD.org");
+		files.add("someday/someday.org");
+		
+		addAgenda("Home", getQuery("TODO", "Home", null, null, null));
+		addAgenda("Online", getQuery("TODO", "Online", null, null, files));
+		addAgenda("Urgent", getQuery(null, null, "A", null, files));
+		addAgenda("Habits", getQuery("TODO", null, null, ":STYLE: habit", files));
 	}
 	
 	public void addAgenda(String title, SelectionBuilder query) {
@@ -86,10 +95,14 @@ public class AgendaFragment extends SherlockFragment {
 		return result;
 	}
 	
-	private SelectionBuilder getQuery(String todo, String tag) {
+	private SelectionBuilder getQuery(String todo, String tag, String priority, String payload, ArrayList<String> filenames) {
 		final SelectionBuilder builder = new SelectionBuilder();
 		builder.table(Tables.ORGDATA);
-		builder.where("NOT " + OrgData.FILE_ID + "=?", Long.toString(getAgendaFileId()));
+		
+		if(filenames == null || filenames.size() == 0)
+			builder.where("NOT " + OrgData.FILE_ID + "=?", Long.toString(getFileId(OrgFile.AGENDA_FILE)));
+		else
+			builder.where(getFileSelection(filenames));
 		
 		if(todo != null && !TextUtils.isEmpty(todo))
 			builder.where(OrgData.TODO + "=?", todo);
@@ -97,12 +110,34 @@ public class AgendaFragment extends SherlockFragment {
 		if(tag != null && !TextUtils.isEmpty(tag))
 			builder.where(OrgData.TAGS + " LIKE ?", "%" + tag+ "%");
 		
+		if(priority != null && !TextUtils.isEmpty(priority))
+			builder.where(OrgData.PRIORITY + "=?", priority);		
+		
+		if(payload != null && !TextUtils.isEmpty(payload))
+			builder.where(OrgData.PAYLOAD + " LIKE ?", "%" + payload+ "%");
+		
 		return builder;
 	}
 	
-	private long getAgendaFileId() {
+	private String getFileSelection(ArrayList<String> filenames) {
+		StringBuilder builder = new StringBuilder();
+		
+		if(filenames == null)
+			return "";
+		
+		for (String filename: filenames) {
+			long fileId = getFileId(filename);
+			builder.append(OrgData.FILE_ID + "=" + Long.toString(fileId)).append(" OR ");
+		}
+		
+		builder.delete(builder.length() - " OR ".length(), builder.length() - 1);
+		Log.d("MobileOrg", "Generated file query: " + builder.toString());
+		return builder.toString();
+	}
+	
+	private long getFileId(String filename) {
 		try {
-			OrgFile agendaFile = new OrgFile(OrgFile.AGENDA_FILE, getActivity().getContentResolver());
+			OrgFile agendaFile = new OrgFile(filename, getActivity().getContentResolver());
 			return agendaFile.id;
 		} catch (OrgFileNotFoundException e) { return -1;}
 	}
