@@ -2,6 +2,7 @@ package com.matburt.mobileorg.Gui.Agenda;
 
 import java.util.ArrayList;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -16,6 +17,9 @@ import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.commonsware.cwac.merge.MergeAdapter;
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.Outline.OutlineActionMode;
@@ -36,15 +40,14 @@ public class AgendaFragment extends SherlockFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		this.agendaList = new ListView(getActivity());
-		this.mergeAdapter = new MergeAdapter();
-
 		this.db = new OrgDatabase(getActivity()).getReadableDatabase();
+
+		this.agendaList = new ListView(getActivity());
+		this.agendaList.setOnItemClickListener(agendaClickListener);
 		
-		setupAgendas();
-		agendaList.setAdapter(mergeAdapter);
-		agendaList.setOnItemClickListener(agendaClickListener);
+		setHasOptionsMenu(true);
 		
+		refresh();
 		return agendaList;
 	}
 	
@@ -56,16 +59,20 @@ public class AgendaFragment extends SherlockFragment {
 			OutlineActionMode.runEditNodeActivity(nodeId, getActivity());
 		}
 	};
+	
+	public void refresh() {
+		this.mergeAdapter = new MergeAdapter();
+		setupAgendas();
+		this.agendaList.setAdapter(mergeAdapter);
+	}
 
 	private void setupAgendas() {
 		ArrayList<String> files = new ArrayList<String>();
-		files.add("GTD.org");
-		files.add("someday/someday.org");
-		
-		addAgenda("Home", getQuery("TODO", "Home", null, null, null));
-		addAgenda("Online", getQuery("TODO", "Online", null, null, files));
-		addAgenda("Urgent", getQuery(null, null, "A", null, files));
-		addAgenda("Habits", getQuery("TODO", null, null, ":STYLE: habit", files));
+		files.add("GTD.org");		
+		addAgenda("Home", getQuery("TODO", "Home", null, null, files, true));
+		addAgenda("Online", getQuery("TODO", "Online", null, null, files, true));
+		addAgenda("Urgent", getQuery(null, null, "A", null, files, true));
+		addAgenda("Habits", getQuery("TODO", null, null, ":STYLE: habit", files, false));
 	}
 	
 	public void addAgenda(String title, SelectionBuilder query) {
@@ -95,7 +102,7 @@ public class AgendaFragment extends SherlockFragment {
 		return result;
 	}
 	
-	private SelectionBuilder getQuery(String todo, String tag, String priority, String payload, ArrayList<String> filenames) {
+	private SelectionBuilder getQuery(String todo, String tag, String priority, String payload, ArrayList<String> filenames, boolean notHabit) {
 		final SelectionBuilder builder = new SelectionBuilder();
 		builder.table(Tables.ORGDATA);
 		
@@ -115,6 +122,9 @@ public class AgendaFragment extends SherlockFragment {
 		
 		if(payload != null && !TextUtils.isEmpty(payload))
 			builder.where(OrgData.PAYLOAD + " LIKE ?", "%" + payload+ "%");
+		
+		if(notHabit)
+			builder.where("NOT " + OrgData.PAYLOAD + " LIKE ?", "'%:STYLE: habit%'");
 		
 		return builder;
 	}
@@ -141,4 +151,25 @@ public class AgendaFragment extends SherlockFragment {
 			return agendaFile.id;
 		} catch (OrgFileNotFoundException e) { return -1;}
 	}
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		super.onCreateOptionsMenu(menu, inflater);
+		
+		MenuItem item = menu.add("Agenda settings");
+		item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		if (item.getItemId() == 0) {
+			startActivity(new Intent(getActivity(), AgendaSettings.class));
+			return true;
+		}
+		else
+			return super.onOptionsItemSelected(item);
+	}
+	
+	
 }
