@@ -9,29 +9,38 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 
-public class AgendaBlockSettings extends SherlockListActivity {
+public class AgendaBlockSettings extends SherlockActivity {
 	public static final String AGENDA_NUMBER = "agenda_number";
 
 	private int agendaPos;
 
+	private TextView titleView;
+	private ListView agendaList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.agenda_settings);
+        this.titleView = (TextView) findViewById(R.id.agenda_title);
+        this.agendaList = (ListView) findViewById(R.id.agenda_list);
         
-        getListView().setOnItemClickListener(agendaItemClick);
-        getListView().setOnCreateContextMenuListener(this);
-        registerForContextMenu(getListView());
+        agendaList.setOnItemClickListener(agendaItemClick);
+        agendaList.setOnCreateContextMenuListener(this);
+        registerForContextMenu(agendaList);
         
         this.agendaPos = getIntent().getIntExtra(AGENDA_NUMBER, -1);
         
         if(this.agendaPos == -1)
-        	this.agendaPos = BlockAgenda.addBlockAgenda(this, "test");
+        	this.agendaPos = BlockAgenda.addBlockAgenda(this);
     }
     
     @Override
@@ -76,9 +85,10 @@ public class AgendaBlockSettings extends SherlockListActivity {
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
 				android.R.layout.simple_list_item_1,
 				BlockAgenda.getBlockAgendaQueryTitles(agendaPos, this));
-		setListAdapter(adapter);
+		agendaList.setAdapter(adapter);
 		String agendaTitle = BlockAgenda.getBlockAgenda(agendaPos, this).title;
-		getSupportActionBar().setTitle(agendaTitle + " blocks");
+		this.titleView.setText(agendaTitle);
+		getSupportActionBar().setTitle("Block settings");
 	}
 
     private void createAgendaBlockEntry() {
@@ -87,25 +97,37 @@ public class AgendaBlockSettings extends SherlockListActivity {
 		startActivity(intent);
     }
     
+    private void saveAgendaBlock() {
+    	BlockAgenda blockAgenda = BlockAgenda.getBlockAgenda(agendaPos, this);
+    	blockAgenda.title = this.titleView.getText().toString();
+    	BlockAgenda.replaceAgenda(blockAgenda, agendaPos, this);
+    }
+    
 	private void removeAgendaBlockEntry(int blockPos) {
 		BlockAgenda.removeBlockAgendaEntry(agendaPos, blockPos, this);
 		refresh();
 	}
     
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		MenuItem create = menu.add("Create");
-		create.setIcon(R.drawable.ic_menu_add);
-		create.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		getSupportMenuInflater().inflate(R.menu.agenda_block, menu);
+		
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		
 		switch(item.getItemId()) {
-		case 0:
+		case R.id.agenda_block_create:
 			createAgendaBlockEntry();
+			break;
+			
+		case R.id.agenda_block_save:
+			saveAgendaBlock();
+			Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
 			break;
 			
 		default:

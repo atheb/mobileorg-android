@@ -84,11 +84,10 @@ public class BlockAgenda implements Serializable {
 	}
 
 
-	public static int addBlockAgenda(Context context, String title) {
+	public static int addBlockAgenda(Context context) {
 		try {
 			ArrayList<BlockAgenda> agendas = readAgendas(context);
 			BlockAgenda blockAgenda = new BlockAgenda();
-			blockAgenda.title = title;
 			agendas.add(blockAgenda);
 			writeAgendas(agendas, context);
 			return agendas.size() - 1;

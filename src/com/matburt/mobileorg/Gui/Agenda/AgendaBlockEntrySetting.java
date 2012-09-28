@@ -96,18 +96,18 @@ public class AgendaBlockEntrySetting extends SherlockActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		getSupportMenuInflater().inflate(R.menu.agenda_block, menu);
+		getSupportMenuInflater().inflate(R.menu.agenda_entry, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
-		case R.id.agenda_block_save:
+		case R.id.agenda_entry_save:
 			saveAgenda();
 			finish();
 			break;
-		case R.id.agenda_block_cancel:
+		case R.id.agenda_entry_cancel:
 			finish();
 			break;
 		
