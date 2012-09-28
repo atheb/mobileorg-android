@@ -3,8 +3,8 @@ package com.matburt.mobileorg.test.Gui;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.matburt.mobileorg.Gui.Agenda.AgendaQueryBuilder;
-import com.matburt.mobileorg.Gui.Agenda.BlockAgenda;
+import com.matburt.mobileorg.Gui.Agenda.OrgQueryBuilder;
+import com.matburt.mobileorg.Gui.Agenda.OrgAgenda;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
@@ -20,31 +20,31 @@ public class AgendaTests extends AndroidTestCase {
 	}
 	
 	public void testBlockSerialization() throws IOException {
-		ArrayList<BlockAgenda> agendas = new ArrayList<BlockAgenda>();
-		BlockAgenda blockAgenda = new BlockAgenda();
+		ArrayList<OrgAgenda> agendas = new ArrayList<OrgAgenda>();
+		OrgAgenda blockAgenda = new OrgAgenda();
 		blockAgenda.title = "test";
 		agendas.add(blockAgenda);
 		
-		BlockAgenda.writeAgendas(agendas, context);
-		ArrayList<BlockAgenda> readAgendas = BlockAgenda.readAgendas(context);
+		OrgAgenda.writeAgendas(agendas, context);
+		ArrayList<OrgAgenda> readAgendas = OrgAgenda.readAgendas(context);
 		
 		assertEquals(agendas.size(), readAgendas.size());
-		BlockAgenda readBlockAgenda = readAgendas.get(0);
+		OrgAgenda readBlockAgenda = readAgendas.get(0);
 		assertEquals(blockAgenda.title, readBlockAgenda.title);
 	}
 	
 	public void testQuerySerialization() throws IOException {
-		ArrayList<BlockAgenda> agendas = new ArrayList<BlockAgenda>();
-		BlockAgenda blockAgenda = new BlockAgenda();
+		ArrayList<OrgAgenda> agendas = new ArrayList<OrgAgenda>();
+		OrgAgenda blockAgenda = new OrgAgenda();
 		agendas.add(blockAgenda);
 
-		AgendaQueryBuilder builder = new AgendaQueryBuilder("test");
+		OrgQueryBuilder builder = new OrgQueryBuilder("test");
 		blockAgenda.queries.add(builder);
 		
-		BlockAgenda.writeAgendas(agendas, context);
-		ArrayList<BlockAgenda> readAgendas = BlockAgenda.readAgendas(context);
+		OrgAgenda.writeAgendas(agendas, context);
+		ArrayList<OrgAgenda> readAgendas = OrgAgenda.readAgendas(context);
 		
-		BlockAgenda readBlockAgenda = readAgendas.get(0);
+		OrgAgenda readBlockAgenda = readAgendas.get(0);
 		assertEquals(blockAgenda.queries.size(), readBlockAgenda.queries.size());
 		assertEquals(blockAgenda.queries.get(0).title, readBlockAgenda.queries.get(0).title);
 	}

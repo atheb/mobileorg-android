@@ -14,7 +14,7 @@ import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.SelectionBuilder;
 
-public class AgendaQueryBuilder implements Serializable {
+public class OrgQueryBuilder implements Serializable {
 	private static final long serialVersionUID = 2;
 	
 	public String title = "";
@@ -28,7 +28,7 @@ public class AgendaQueryBuilder implements Serializable {
 	public boolean filterHabits = false;
 	public boolean activeTodos = false;
 	
-	public AgendaQueryBuilder(String title) {
+	public OrgQueryBuilder(String title) {
 		this.title = title;
 	}
 	

@@ -3,28 +3,44 @@ package com.matburt.mobileorg.Gui.Agenda;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.app.SherlockActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 
-public class AgendaSettings extends SherlockListActivity {
-		
+public class AgendaSettings extends SherlockActivity {
+	public static final String AGENDA_NUMBER = "agenda_number";
+
+	private int agendaPos;
+
+	private TextView titleView;
+	private ListView agendaList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.agenda_settings);
+        this.titleView = (TextView) findViewById(R.id.agenda_title);
+        this.agendaList = (ListView) findViewById(R.id.agenda_list);
         
-        getListView().setOnItemClickListener(agendaItemClick);
-        getListView().setOnCreateContextMenuListener(this);
-        registerForContextMenu(getListView());
-        getSupportActionBar().setTitle("Agenda Settings");
+        agendaList.setOnItemClickListener(agendaItemClick);
+        agendaList.setOnCreateContextMenuListener(this);
+        registerForContextMenu(agendaList);
+        
+        this.agendaPos = getIntent().getIntExtra(AGENDA_NUMBER, -1);
+        
+        if(this.agendaPos == -1)
+        	this.agendaPos = OrgAgenda.addAgenda(this);
     }
     
     @Override
@@ -33,6 +49,75 @@ public class AgendaSettings extends SherlockListActivity {
 		refresh();
 	}
     
+	public void refresh() {
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1,
+				OrgAgenda.getAgendaQueryTitles(agendaPos, this));
+		agendaList.setAdapter(adapter);
+		String agendaTitle = OrgAgenda.getAgenda(agendaPos, this).title;
+		this.titleView.setText(agendaTitle);
+		getSupportActionBar().setTitle("Block settings");
+	}
+
+
+	private OnItemClickListener agendaItemClick = new OnItemClickListener() {
+		@Override
+		public void onItemClick(AdapterView<?> adapter, View view, int position,
+				long id) {
+			Intent intent = new Intent(AgendaSettings.this, AgendaEntrySetting.class);
+			intent.putExtra(AgendaEntrySetting.AGENDA_NUMBER, agendaPos);
+			intent.putExtra(AgendaEntrySetting.ENTRY_NUMBER, position);
+			startActivity(intent);
+		}
+	};
+	
+
+    private void createAgendaBlockEntry() {
+		Intent intent = new Intent(AgendaSettings.this, AgendaEntrySetting.class);
+		intent.putExtra(AgendaEntrySetting.AGENDA_NUMBER, this.agendaPos);
+		startActivity(intent);
+    }
+    
+    private void saveAgendaBlock() {
+    	OrgAgenda blockAgenda = OrgAgenda.getAgenda(agendaPos, this);
+    	blockAgenda.title = this.titleView.getText().toString();
+    	OrgAgenda.replaceAgenda(blockAgenda, agendaPos, this);
+    }
+    
+	private void removeAgendaBlockEntry(int blockPos) {
+		OrgAgenda.removeAgendaEntry(agendaPos, blockPos, this);
+		refresh();
+	}
+    
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		getSupportMenuInflater().inflate(R.menu.agenda_block, menu);
+		
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		
+		switch(item.getItemId()) {
+		case R.id.agenda_block_create:
+			createAgendaBlockEntry();
+			break;
+			
+		case R.id.agenda_block_save:
+			saveAgendaBlock();
+			Toast.makeText(this, "Saved", Toast.LENGTH_SHORT).show();
+			break;
+			
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+		
+		return true;
+	}
+	
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -45,62 +130,10 @@ public class AgendaSettings extends SherlockListActivity {
 	public boolean onContextItemSelected(android.view.MenuItem item) {
 		if(item.getTitle().equals("Remove")) {
 		    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-			removeBlockAgenda(info.position);
+			removeAgendaBlockEntry(info.position);
 			return true;
 		}
 		else
 			return super.onContextItemSelected(item);
-	}
-
-
-	private OnItemClickListener agendaItemClick = new OnItemClickListener() {
-		@Override
-		public void onItemClick(AdapterView<?> adapter, View view, int position,
-				long id) {
-			Intent intent = new Intent(AgendaSettings.this, AgendaBlockSettings.class);
-			intent.putExtra(AgendaBlockSettings.AGENDA_NUMBER, position);
-			startActivity(intent);
-		}
-	};
-	
-    
-	private void refresh() {
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_1, BlockAgenda.getAgendasTitles(this));
-        setListAdapter(adapter);
-	}
-
-    
-    private void createBlockAgenda() {
-		Intent intent = new Intent(AgendaSettings.this, AgendaBlockSettings.class);
-		startActivity(intent);
-    }
-    
-	private void removeBlockAgenda(int position) {
-		BlockAgenda.removeAgenda(position, this);
-		refresh();
-	}
-    
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		super.onCreateOptionsMenu(menu);
-		MenuItem create = menu.add("Create");
-		create.setIcon(R.drawable.ic_menu_add);
-		create.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId()) {
-		case 0:
-			createBlockAgenda();
-			break;
-			
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-		
-		return true;
 	}
 }

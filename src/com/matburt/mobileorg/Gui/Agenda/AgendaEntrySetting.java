@@ -12,12 +12,12 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 
-public class AgendaBlockEntrySetting extends SherlockActivity {
+public class AgendaEntrySetting extends SherlockActivity {
 	public static final String AGENDA_NUMBER = "agenda_number";
-	public static final String BLOCK_NUMBER = "block_number";
+	public static final String ENTRY_NUMBER = "entry_number";
 	
 	private int agendaPos;
-	private int blockPos;
+	private int entryPos;
 	
 	private EditText titleView;
 	private EditText payloadView;
@@ -40,12 +40,12 @@ public class AgendaBlockEntrySetting extends SherlockActivity {
 		this.filterHabitsView = (CheckBox) findViewById(R.id.agenda_block_habits);
 
 		this.agendaPos = getIntent().getIntExtra(AGENDA_NUMBER, -1);
-		this.blockPos = getIntent().getIntExtra(BLOCK_NUMBER, -1);
+		this.entryPos = getIntent().getIntExtra(ENTRY_NUMBER, -1);
 	
-		setupSettings(BlockAgenda.getAgendaBlockEntry(agendaPos, blockPos, this));
+		setupSettings(OrgAgenda.getAgendaEntry(agendaPos, entryPos, this));
 	}
 	
-	public void setupSettings(AgendaQueryBuilder agenda) {
+	public void setupSettings(OrgQueryBuilder agenda) {
 		titleView.setText(agenda.title);
 		payloadView.setText(combineToString(agenda.payloads));
 		todoView.setText(combineToString(agenda.todos));
@@ -54,8 +54,8 @@ public class AgendaBlockEntrySetting extends SherlockActivity {
 		filterHabitsView.setChecked(agenda.filterHabits);
 	}
 
-	public AgendaQueryBuilder getQueryFromSettings() {
-		AgendaQueryBuilder agenda = new AgendaQueryBuilder(titleView.getText().toString());
+	public OrgQueryBuilder getQueryFromSettings() {
+		OrgQueryBuilder agenda = new OrgQueryBuilder(titleView.getText().toString());
 		
 		agenda.tags = splitToArrayList(tagsView.getText().toString());
 		agenda.payloads = splitToArrayList(payloadView.getText().toString());
@@ -88,10 +88,6 @@ public class AgendaBlockEntrySetting extends SherlockActivity {
 		return new ArrayList<String>(Arrays.asList(split));
 	}
 
-	private void saveAgenda() {
-		BlockAgenda.writeAgendaBlockEntry(getQueryFromSettings(), agendaPos,
-				blockPos, this);
-	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -104,7 +100,8 @@ public class AgendaBlockEntrySetting extends SherlockActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 		case R.id.agenda_entry_save:
-			saveAgenda();
+			OrgAgenda.writeAgendaEntry(getQueryFromSettings(), agendaPos,
+					entryPos, this);
 			finish();
 			break;
 		case R.id.agenda_entry_cancel:

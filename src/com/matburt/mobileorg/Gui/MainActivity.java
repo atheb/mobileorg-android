@@ -19,7 +19,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.actionbarsherlock.view.Window;
 import com.matburt.mobileorg.R;
-import com.matburt.mobileorg.Gui.Agenda.AgendaFragment;
+import com.matburt.mobileorg.Gui.Agenda.AgendasFragment;
 import com.matburt.mobileorg.Gui.Outline.OutlineFragment;
 import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.Services.SyncService;
@@ -149,7 +149,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		transaction.hide(outlineFragment);
 		transaction.addToBackStack(outlineFragment.getTag());
 		
-		Fragment agendaFragment = new AgendaFragment();
+		Fragment agendaFragment = new AgendasFragment();
 		transaction.add(R.id.main_main, agendaFragment, "agendaFragment");
 		transaction.show(agendaFragment);
 		

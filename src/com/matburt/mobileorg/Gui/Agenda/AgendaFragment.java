@@ -1,33 +1,36 @@
 package com.matburt.mobileorg.Gui.Agenda;
 
-import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import com.commonsware.cwac.merge.MergeAdapter;
 import com.matburt.mobileorg.R;
+import com.matburt.mobileorg.Gui.Outline.OutlineActionMode;
+import com.matburt.mobileorg.Gui.Outline.OutlineAdapter;
+import com.matburt.mobileorg.OrgData.OrgDatabase;
 
 public class AgendaFragment extends SherlockFragment {
 
+	public int agendaPos = 0;
 	private ListView agendaList;
+	private MergeAdapter mergeAdapter;
+	private SQLiteDatabase db;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		this.db = new OrgDatabase(getActivity()).getReadableDatabase();
+
 		this.agendaList = new ListView(getActivity());
 		this.agendaList.setOnItemClickListener(agendaClickListener);
-		
-		setHasOptionsMenu(true);
 		
 		return agendaList;
 	}
@@ -35,55 +38,38 @@ public class AgendaFragment extends SherlockFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		setupAgendas();
+		showBlockAgenda(agendaPos);
 	}
+	
+	public void showBlockAgenda(int agendaPos) {
+		this.mergeAdapter = new MergeAdapter();
+		
+		OrgAgenda blockAgenda = OrgAgenda.getAgenda(agendaPos, getActivity());
+		
+		for (OrgQueryBuilder agenda : blockAgenda.queries)
+			addAgenda(agenda);
 
-	private void setupAgendas() {
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-				android.R.layout.simple_list_item_1,
-				BlockAgenda.getAgendasTitles(getActivity()));
-		agendaList.setAdapter(adapter);
-
+		this.agendaList.setAdapter(mergeAdapter);
+		this.agendaList.setOnItemClickListener(agendaClickListener);
+		//getSherlockActivity().getSupportActionBar().setTitle(blockAgenda.title);
 	}
+	
+	public void addAgenda(OrgQueryBuilder query) {
+		TextView titleView = (TextView) View.inflate(getActivity(), R.layout.agenda_header, null);
+		titleView.setText(query.title);
+		mergeAdapter.addView(titleView);
 
+		OutlineAdapter adapter = new OutlineAdapter(getActivity(), false);
+		adapter.setState(query.getNodes(db, getActivity()));
+		mergeAdapter.addAdapter(adapter);
+	}
+	
 	private OnItemClickListener agendaClickListener = new OnItemClickListener() {
 		@Override
-		public void onItemClick(AdapterView<?> adapter, View view,
-				int position, long id) {
-			showBlockAgendaFragment(position);
+		public void onItemClick(AdapterView<?> parent, View v, int position,
+				long id) {
+			long nodeId = mergeAdapter.getItemId(position);
+			OutlineActionMode.runEditNodeActivity(nodeId, getActivity());
 		}
 	};
-	
-	private void showBlockAgendaFragment(int position) {
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		transaction.hide(this);
-		
-		AgendaBlockFragment blockFragment = new AgendaBlockFragment();
-		blockFragment.agendaPos = position;
-		transaction.add(R.id.main_main, blockFragment, "agendaBlockFragment");
-		transaction.show(blockFragment);
-		transaction.addToBackStack(getTag());
-		
-		transaction.commit();
-	}
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-		super.onCreateOptionsMenu(menu, inflater);
-		
-		MenuItem item = menu.add("Agenda settings");
-		item.setIcon(R.drawable.ic_menu_preferences);
-		item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		
-		if (item.getItemId() == 0) {
-			startActivity(new Intent(getActivity(), AgendaSettings.class));
-			return true;
-		}
-		else
-			return super.onOptionsItemSelected(item);
-	}
 }
