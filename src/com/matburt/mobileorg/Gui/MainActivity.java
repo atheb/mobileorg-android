@@ -126,10 +126,13 @@ public class MainActivity extends SherlockFragmentActivity {
 			return true;
 
 		case R.id.menu_outline:
-			//runExpandableOutline(-1);
-			showAgenda();
+			runExpandableOutline(-1);
 			return true;
 
+		case R.id.menu_agenda:
+			showAgenda();
+			return true;
+			
 		case R.id.menu_search:
 			return runSearch();
 
@@ -144,6 +147,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 
 		transaction.hide(outlineFragment);
+		transaction.addToBackStack(outlineFragment.getTag());
 		
 		Fragment agendaFragment = new AgendaFragment();
 		transaction.add(R.id.main_main, agendaFragment, "agendaFragment");
