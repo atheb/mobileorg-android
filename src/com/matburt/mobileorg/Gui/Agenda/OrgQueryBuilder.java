@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgDatabase.Tables;
 import com.matburt.mobileorg.OrgData.OrgFile;
+import com.matburt.mobileorg.OrgData.OrgProviderUtils;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
 import com.matburt.mobileorg.util.SelectionBuilder;
 
@@ -55,46 +56,39 @@ public class OrgQueryBuilder implements Serializable {
 
 		getFileSelection(builder, context);
 		
+		if(activeTodos)
+			builder.where(getSelection(OrgProviderUtils.getActiveTodos(context
+					.getContentResolver()), OrgData.TODO, true));
+		
 		if(todos != null && todos.size() > 0)
-			builder.where(getSelection(todos, OrgData.TODO));
+			builder.where(getSelection(todos, OrgData.TODO, true));
 		
 		if(tags != null && tags.size() > 0)
-			builder.where(getLikeSelection(tags, OrgData.TAGS));
+			builder.where(getSelection(tags, OrgData.TAGS, false));
 		
 		if(priorities != null && priorities.size() > 0)
-			builder.where(getSelection(priorities, OrgData.PRIORITY));		
+			builder.where(getSelection(priorities, OrgData.PRIORITY, true));		
 		
 		if(payloads != null && payloads.size() > 0)
-			builder.where(getLikeSelection(payloads, OrgData.PAYLOAD));
+			builder.where(getSelection(payloads, OrgData.PAYLOAD, false));
 		
 		if(filterHabits)
-			builder.where("NOT " + OrgData.PAYLOAD + " LIKE ?", "'%:STYLE: habit%'");
+			builder.where("NOT " + OrgData.PAYLOAD + " LIKE ?", "%:STYLE: habit%");
 		
 		return builder;
 	}
 	
-	private String getLikeSelection(ArrayList<String> values, String column) {
+	private String getSelection(ArrayList<String> values, String column, boolean exactMatch) {
 		StringBuilder builder = new StringBuilder();
 		
 		if(values == null)
 			return "";
 		
 		for (String value: values) {
-			builder.append(column + " LIKE '%" + value + "%'").append(" OR ");
-		}
-		
-		builder.delete(builder.length() - " OR ".length(), builder.length() - 1);
-		return builder.toString();
-	}
-	
-	private String getSelection(ArrayList<String> values, String column) {
-		StringBuilder builder = new StringBuilder();
-		
-		if(values == null)
-			return "";
-		
-		for (String value: values) {
-			builder.append(column + "='" + value + "'").append(" OR ");
+			if(exactMatch)
+				builder.append(column + "='" + value + "'").append(" OR ");
+			else
+				builder.append(column + " LIKE '%" + value + "%'").append(" OR ");
 		}
 		
 		builder.delete(builder.length() - " OR ".length(), builder.length() - 1);

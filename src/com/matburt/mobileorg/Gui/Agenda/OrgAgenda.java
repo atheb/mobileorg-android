@@ -17,7 +17,21 @@ public class OrgAgenda implements Serializable {
 	public String title = "";
 	
 	public ArrayList<OrgQueryBuilder> queries = new ArrayList<OrgQueryBuilder>();
-
+	
+	public static void ensureAgendas(Context context) {
+		try {
+			ArrayList<OrgAgenda> agendas = readAgendas(context);
+			
+			if(agendas != null)
+				return;
+		} catch (IOException e) {}
+		
+		// Haven't found proper agendas file, writing empty
+		try {
+			writeAgendas(new ArrayList<OrgAgenda>(), context);
+		} catch (IOException e) {}
+	}
+	
 	public static ArrayList<OrgAgenda> readAgendas(Context context) throws IOException {
 		FileInputStream fis = context.openFileInput(AGENDA_CONFIG_FILE);
 		byte[] serializedObject = new byte[fis.available()];

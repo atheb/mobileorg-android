@@ -33,6 +33,7 @@ public class AgendasFragment extends SherlockFragment {
 
 		setHasOptionsMenu(true);
 		
+		OrgAgenda.ensureAgendas(getActivity());
 		return agendaList;
 	}
 	
