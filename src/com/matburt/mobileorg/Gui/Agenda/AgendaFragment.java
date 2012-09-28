@@ -67,14 +67,17 @@ public class AgendaFragment extends SherlockFragment {
 
 	private void setupAgendas() {	
 		try {
-			ArrayList<AgendaQuery> agendas = AgendaQuery.read(getActivity());
+			ArrayList<BlockAgenda> agendas = BlockAgenda.readAgendas(getActivity());
 			
-			for(AgendaQuery agenda: agendas)
+			if(agendas.size() == 0)
+				return;
+			
+			for(AgendaQueryBuilder agenda: agendas.get(0).queries)
 				addAgenda(agenda);
 		} catch (IOException e) {}
 	}
 	
-	public void addAgenda(AgendaQuery query) {
+	public void addAgenda(AgendaQueryBuilder query) {
 		TextView titleView = (TextView) View.inflate(getActivity(), R.layout.agenda_header, null);
 		titleView.setText(query.title);
 		mergeAdapter.addView(titleView);

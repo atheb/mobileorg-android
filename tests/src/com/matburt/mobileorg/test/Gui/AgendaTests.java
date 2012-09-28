@@ -3,7 +3,8 @@ package com.matburt.mobileorg.test.Gui;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.matburt.mobileorg.Gui.Agenda.AgendaQuery;
+import com.matburt.mobileorg.Gui.Agenda.AgendaQueryBuilder;
+import com.matburt.mobileorg.Gui.Agenda.BlockAgenda;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
@@ -17,19 +18,34 @@ public class AgendaTests extends AndroidTestCase {
 		super.setUp();
 		this.context = getContext();
 	}
+	
+	public void testBlockSerialization() throws IOException {
+		ArrayList<BlockAgenda> agendas = new ArrayList<BlockAgenda>();
+		BlockAgenda blockAgenda = new BlockAgenda();
+		blockAgenda.title = "test";
+		agendas.add(blockAgenda);
+		
+		BlockAgenda.writeAgendas(agendas, context);
+		ArrayList<BlockAgenda> readAgendas = BlockAgenda.readAgendas(context);
+		
+		assertEquals(agendas.size(), readAgendas.size());
+		BlockAgenda readBlockAgenda = readAgendas.get(0);
+		assertEquals(blockAgenda.title, readBlockAgenda.title);
+	}
+	
+	public void testQuerySerialization() throws IOException {
+		ArrayList<BlockAgenda> agendas = new ArrayList<BlockAgenda>();
+		BlockAgenda blockAgenda = new BlockAgenda();
+		agendas.add(blockAgenda);
 
-	public void testSerialization() throws IOException {
-		AgendaQuery test = new AgendaQuery("test");
-		test.todos.add("TODO");
+		AgendaQueryBuilder builder = new AgendaQueryBuilder("test");
+		blockAgenda.queries.add(builder);
 		
-		ArrayList<AgendaQuery> agendas = new ArrayList<AgendaQuery>();
-		agendas.add(test);
+		BlockAgenda.writeAgendas(agendas, context);
+		ArrayList<BlockAgenda> readAgendas = BlockAgenda.readAgendas(context);
 		
-		AgendaQuery.write(agendas, context);
-		
-		ArrayList<AgendaQuery> read = AgendaQuery.read(context);
-		
-		assertEquals(agendas.size(), read.size());
-		assertEquals(test.title, read.get(0).title);
+		BlockAgenda readBlockAgenda = readAgendas.get(0);
+		assertEquals(blockAgenda.queries.size(), readBlockAgenda.queries.size());
+		assertEquals(blockAgenda.queries.get(0).title, readBlockAgenda.queries.get(0).title);
 	}
 }

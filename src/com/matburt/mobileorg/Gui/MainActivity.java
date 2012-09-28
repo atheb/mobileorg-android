@@ -59,7 +59,6 @@ public class MainActivity extends SherlockFragmentActivity {
 		this.outlineFragment = (OutlineFragment) getSupportFragmentManager()
 				.findFragmentById(R.id.outlineFragment);
 		refreshDisplay();
-		showAgenda();
 	}
 
 	
@@ -127,7 +126,8 @@ public class MainActivity extends SherlockFragmentActivity {
 			return true;
 
 		case R.id.menu_outline:
-			runExpandableOutline(-1);
+			//runExpandableOutline(-1);
+			showAgenda();
 			return true;
 
 		case R.id.menu_search:

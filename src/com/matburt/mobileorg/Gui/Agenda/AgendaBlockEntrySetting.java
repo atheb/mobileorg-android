@@ -1,6 +1,5 @@
 package com.matburt.mobileorg.Gui.Agenda;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -13,11 +12,12 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 import com.matburt.mobileorg.R;
 
-public class AgendaBlockSetting extends SherlockActivity {
+public class AgendaBlockEntrySetting extends SherlockActivity {
+	public static final String AGENDA_NUMBER = "agenda_number";
 	public static final String BLOCK_NUMBER = "block_number";
 	
-	private int position;
-	private ArrayList<AgendaQuery> agendas;
+	private int agendaPos;
+	private int blockPos;
 	
 	private EditText titleView;
 	private EditText payloadView;
@@ -38,12 +38,14 @@ public class AgendaBlockSetting extends SherlockActivity {
 		this.payloadView = (EditText) findViewById(R.id.agenda_block_payload);
 
 		this.filterHabitsView = (CheckBox) findViewById(R.id.agenda_block_habits);
-		
-		this.position = getIntent().getIntExtra(BLOCK_NUMBER, -1);
-		setupSettings(loadAgenda(position));
+
+		this.agendaPos = getIntent().getIntExtra(AGENDA_NUMBER, -1);
+		this.blockPos = getIntent().getIntExtra(BLOCK_NUMBER, -1);
+	
+		setupSettings(BlockAgenda.getAgendaBlockEntry(agendaPos, blockPos, this));
 	}
 	
-	public void setupSettings(AgendaQuery agenda) {
+	public void setupSettings(AgendaQueryBuilder agenda) {
 		titleView.setText(agenda.title);
 		payloadView.setText(combineToString(agenda.payloads));
 		todoView.setText(combineToString(agenda.todos));
@@ -52,8 +54,8 @@ public class AgendaBlockSetting extends SherlockActivity {
 		filterHabitsView.setChecked(agenda.filterHabits);
 	}
 
-	public AgendaQuery getQueryFromSettings() {
-		AgendaQuery agenda = new AgendaQuery(titleView.getText().toString());
+	public AgendaQueryBuilder getQueryFromSettings() {
+		AgendaQueryBuilder agenda = new AgendaQueryBuilder(titleView.getText().toString());
 		
 		agenda.tags = splitToArrayList(tagsView.getText().toString());
 		agenda.payloads = splitToArrayList(payloadView.getText().toString());
@@ -85,27 +87,10 @@ public class AgendaBlockSetting extends SherlockActivity {
 		String[] split = string.split(":");
 		return new ArrayList<String>(Arrays.asList(split));
 	}
-	
-	public AgendaQuery loadAgenda(int position) {
-		try {
-			agendas = AgendaQuery.read(this);
-			
-			if(position >= 0 && position < agendas.size())
-				return agendas.get(position);
-		} catch (IOException e) {}
-		return new AgendaQuery("");
-	}
-	
-	public void saveAgenda() {
-		if(position >= 0 && position < agendas.size()) {
-			agendas.remove(position);
-			agendas.add(position, getQueryFromSettings());
-		} else {
-			agendas.add(getQueryFromSettings());
-		}
-		try {
-			AgendaQuery.write(agendas, this);
-		} catch (IOException e) {}
+
+	private void saveAgenda() {
+		BlockAgenda.writeAgendaBlockEntry(getQueryFromSettings(), agendaPos,
+				blockPos, this);
 	}
 
 	@Override

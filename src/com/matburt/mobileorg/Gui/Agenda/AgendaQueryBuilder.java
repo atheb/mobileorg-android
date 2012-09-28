@@ -1,8 +1,5 @@
 package com.matburt.mobileorg.Gui.Agenda;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -15,12 +12,10 @@ import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgDatabase.Tables;
 import com.matburt.mobileorg.OrgData.OrgFile;
 import com.matburt.mobileorg.util.OrgFileNotFoundException;
-import com.matburt.mobileorg.util.OrgUtils;
 import com.matburt.mobileorg.util.SelectionBuilder;
 
-public class AgendaQuery implements Serializable {
-	private static final long serialVersionUID = 1;
-	private static final String AGENDA_CONFIG_FILE = "agendas.conf";
+public class AgendaQueryBuilder implements Serializable {
+	private static final long serialVersionUID = 2;
 	
 	public String title = "";
 	
@@ -33,7 +28,7 @@ public class AgendaQuery implements Serializable {
 	public boolean filterHabits = false;
 	public boolean activeTodos = false;
 	
-	public AgendaQuery(String title) {
+	public AgendaQueryBuilder(String title) {
 		this.title = title;
 	}
 	
@@ -54,7 +49,7 @@ public class AgendaQuery implements Serializable {
 		return result;
 	}
 	
-	private SelectionBuilder getQuery(Context context) {
+	public SelectionBuilder getQuery(Context context) {
 		final SelectionBuilder builder = new SelectionBuilder();
 		builder.table(Tables.ORGDATA);
 
@@ -130,24 +125,4 @@ public class AgendaQuery implements Serializable {
 			return agendaFile.id;
 		} catch (OrgFileNotFoundException e) { return -1;}
 	}
-	
-
-	public static void write(ArrayList<AgendaQuery> queries, Context context) throws IOException {
-		byte[] serializeObject = OrgUtils.serializeObject(queries);
-		FileOutputStream fos = context.openFileOutput(AGENDA_CONFIG_FILE, Context.MODE_PRIVATE);
-		fos.write(serializeObject);
-		fos.close();
-	}
-	
-	public static ArrayList<AgendaQuery> read(Context context) throws IOException {
-		FileInputStream fis = context.openFileInput(AGENDA_CONFIG_FILE);
-		byte[] serializedObject = new byte[fis.available()];
-		fis.read(serializedObject);
-		fis.close();
-		
-		@SuppressWarnings("unchecked")
-		ArrayList<AgendaQuery> result = (ArrayList<AgendaQuery>) OrgUtils
-				.deserializeObject(serializedObject);
-		return result;
-	}	
 }

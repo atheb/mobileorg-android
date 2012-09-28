@@ -161,8 +161,9 @@
             android:name=".Services.TimeclockDialog"
             android:theme="@android:style/Theme.Dialog" >
         </activity>
+        <activity android:name=".Gui.Agenda.AgendaBlockSettings"></activity>
+        <activity android:name=".Gui.Agenda.AgendaBlockEntrySetting"></activity>
         <activity android:name=".Gui.Agenda.AgendaSettings"></activity>
-        <activity android:name=".Gui.Agenda.AgendaBlockSetting"></activity>
     </application>
 
 </manifest>
