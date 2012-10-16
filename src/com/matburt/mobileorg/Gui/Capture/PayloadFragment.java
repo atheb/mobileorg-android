@@ -12,11 +12,14 @@ import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.content.ContentResolver;
+
 
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.ViewFragment;
 import com.matburt.mobileorg.OrgData.OrgNode;
 import com.matburt.mobileorg.OrgData.OrgNodePayload;
+import com.matburt.mobileorg.util.OrgNodeNotFoundException;
 
 public class PayloadFragment extends ViewFragment {
 	private static final String PAYLOAD = "payload";
@@ -28,7 +31,9 @@ public class PayloadFragment extends ViewFragment {
 	private ImageButton editButton;
 	private ImageButton cancelButton;
 	private ImageButton saveButton;
-	
+
+        private ContentResolver resolver;	
+
 	private OnPayloadModifiedListener mListener;
 	
 	@Override
@@ -40,6 +45,7 @@ public class PayloadFragment extends ViewFragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnPayloadModifiedListener");
         }
+                resolver = activity.getContentResolver();
 	}
 
 	@Override
@@ -76,10 +82,12 @@ public class PayloadFragment extends ViewFragment {
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		EditActivity editActivity = (EditActivity) getActivity();
-		
-		OrgNode node = editActivity.getOrgNode();
-		this.payload = node.getOrgNodePayload();
-		
+
+                try {
+                    OrgNode node = new OrgNode(editActivity.getOrgNode().id, resolver);
+                    this.payload = node.getOrgNodePayload();
+                } catch( OrgNodeNotFoundException e ) { }
+
 		if(savedInstanceState != null)
 			restoreInstanceState(savedInstanceState);
 		else
