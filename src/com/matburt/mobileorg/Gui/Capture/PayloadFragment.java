@@ -174,12 +174,16 @@ public class PayloadFragment extends ViewFragment {
 	private OnClickListener saveListener = new OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			setPayload(payloadEdit.getText().toString());
-			switchToView();
-			mListener.onPayloadEndedEdit();
-			webView.requestFocus();
+                    savePayload();
 		}
 	};
+
+        public void savePayload() {
+                setPayload(payloadEdit.getText().toString());
+                switchToView();
+                mListener.onPayloadEndedEdit();
+                webView.requestFocus();
+        }
 	
 	private OnClickListener cancelListener = new OnClickListener() {
 		@Override

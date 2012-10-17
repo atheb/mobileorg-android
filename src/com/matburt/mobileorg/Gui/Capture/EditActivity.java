@@ -272,6 +272,7 @@ public class EditActivity extends SherlockFragmentActivity implements
 		
 		PayloadFragment payloadFragment = (PayloadFragment) getSupportFragmentManager()
 				.findFragmentByTag("payloadFragment");
+                payloadFragment.savePayload();
 		newNode.setPayload(payloadFragment.getPayload());
 
 		return newNode;
