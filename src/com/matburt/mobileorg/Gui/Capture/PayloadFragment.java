@@ -86,7 +86,10 @@ public class PayloadFragment extends ViewFragment {
                 try {
                     OrgNode node = new OrgNode(editActivity.getOrgNode().id, resolver);
                     this.payload = node.getOrgNodePayload();
-                } catch( OrgNodeNotFoundException e ) { }
+                } catch( OrgNodeNotFoundException e ) { 
+                    OrgNode node = editActivity.getOrgNode();
+                    this.payload = node.getOrgNodePayload();
+                }
 
 		if(savedInstanceState != null)
 			restoreInstanceState(savedInstanceState);
