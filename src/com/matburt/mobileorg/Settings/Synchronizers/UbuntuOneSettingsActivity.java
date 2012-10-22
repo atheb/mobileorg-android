@@ -12,7 +12,7 @@ import com.matburt.mobileorg.R;
 
 public class UbuntuOneSettingsActivity extends PreferenceActivity implements OnPreferenceClickListener, OnSharedPreferenceChangeListener
 {
-	public static final String KEY_UBUNTUONE_PATH = "ubuntuonePath";
+	public static final String KEY_UBUNTUONE_PATH = "ubuntuOnePath";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
