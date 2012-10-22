@@ -102,6 +102,18 @@ public class Synchronizer {
 		if (localContents.equals(""))
 			return;
 		String remoteContent = FileUtils.read(syncher.getRemoteFile(filename));
+                // Write backup file
+                String backup_file = "org_mobile_backup.org";
+                String localBackupContent = "";
+                String remoteBackupContent = FileUtils.read( syncher.getRemoteFile("org_mobile_backup.org"));
+		if (remoteBackupContent.indexOf("{\"error\":") == -1) {
+			localBackupContent = remoteBackupContent + "\n" + localContents;
+                        syncher.putRemoteFile(backup_file, localBackupContent);
+                } else {
+                    Log.e("MobileOrg/../Synchronizer","error getting remoteBackupContent");
+                }
+
+                String remoteContent = FileUtils.read(syncher.getRemoteFile(filename));
 
 		if (remoteContent.indexOf("{\"error\":") == -1)
 			localContents = remoteContent + "\n" + localContents;
