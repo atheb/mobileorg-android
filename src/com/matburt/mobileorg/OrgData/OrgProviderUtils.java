@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.util.Log;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -13,6 +15,7 @@ import android.text.TextUtils;
 
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
+import com.matburt.mobileorg.OrgData.OrgContract.FilesColumns;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
 import com.matburt.mobileorg.OrgData.OrgContract.Priorities;
 import com.matburt.mobileorg.OrgData.OrgContract.Tags;
@@ -36,7 +39,9 @@ public class OrgProviderUtils {
 			try {
 				orgFile.set(cursor);
 				checksums.put(orgFile.filename, orgFile.checksum);
-			} catch (OrgFileNotFoundException e) {}
+			} catch (OrgFileNotFoundException e) {
+                            Log.e("MobileOrg/../OrgProviderUtils","OrgFileNotFound: " + cursor.getString(cursor.getColumnIndex(OrgContract.FilesColumns.FILENAME)) );
+                        }
 			cursor.moveToNext();
 		}
 

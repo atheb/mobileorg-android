@@ -6,6 +6,8 @@ import java.security.cert.CertificateException;
 
 import javax.net.ssl.SSLHandshakeException;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+
 public interface SynchronizerInterface {
 
 	/**
@@ -21,7 +23,7 @@ public interface SynchronizerInterface {
 	 * @param contents Content of the new file
 	 */
 	public void putRemoteFile(String filename, String contents)
-        throws IOException;
+            throws IOException, GitAPIException;
 
 	/**
 	 * Returns a BufferedReader to the remote file.
@@ -30,7 +32,7 @@ public interface SynchronizerInterface {
 	 *            Name of the file, without path
 	 */
 	public BufferedReader getRemoteFile(String filename)
-        throws IOException, CertificateException, SSLHandshakeException;
+            throws IOException, CertificateException, SSLHandshakeException,GitAPIException, SynchronizeException;
 
 	/**
 	 * Use this to disconnect from any services and cleanup.

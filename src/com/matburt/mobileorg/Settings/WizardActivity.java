@@ -1,9 +1,12 @@
 package com.matburt.mobileorg.Settings;
 
 import java.util.ArrayList;
+import java.io.File;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -38,8 +41,10 @@ import com.matburt.mobileorg.Dropbox.DropboxLoginListener;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
 import com.matburt.mobileorg.Synchronizers.WebDAVSynchronizer;
+import com.matburt.mobileorg.Synchronizers.GitSynchronizer;
 import com.matburt.mobileorg.Views.PageFlipView;
 import com.matburt.mobileorg.util.OrgUtils;
+import com.matburt.mobileorg.util.FileUtils;
 
 public class WizardActivity extends Activity {
 
@@ -78,7 +83,7 @@ public class WizardActivity extends Activity {
     PageFlipView wizard;
     //page 1 variables
     String syncSource;
-    int syncWebDav, syncDropBox, syncUbuntuOne, syncSdCard, syncNull, syncSSH;
+    int syncWebDav, syncDropBox, syncUbuntuOne, syncSdCard, syncNull, syncSSH, syncGit;
     RadioGroup syncGroup; 
     //page 2 variables
     View loginPage;
@@ -110,6 +115,10 @@ public class WizardActivity extends Activity {
     EditText sshHost;
     EditText sshPort;
     Button sshLoginButton;
+    // git variables
+    EditText gitLocalUrl;
+    EditText gitRemoteUrl;
+    Button pullButton;
     //page 3 variables
     ListView folderList;
     ArrayList<String> folders;
@@ -134,6 +143,7 @@ public class WizardActivity extends Activity {
     	syncSdCard = ((RadioButton)findViewById(R.id.sync_sdcard)).getId();
         syncNull = ((RadioButton)findViewById(R.id.sync_null)).getId();
         syncSSH = ((RadioButton)findViewById(R.id.sync_ssh)).getId();
+        syncGit = ((RadioButton)findViewById(R.id.sync_git)).getId();
     	syncGroup.clearCheck();
     	syncGroup.setOnCheckedChangeListener(new Page1Listener());
     	//setup dropbox
@@ -193,6 +203,10 @@ public class WizardActivity extends Activity {
                 syncSource = "scp";
                 createSSHConfig();
             }
+            else if (checkedId == syncGit) {
+                syncSource = "git";
+                createGitConfig();
+            }
             else if (checkedId == syncNull) {
                 syncSource = "null";
                 createNullConfig();
@@ -213,6 +227,27 @@ public class WizardActivity extends Activity {
         wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
         wizard.enablePage(1);
     }
+
+    void createGitConfig() {
+        wizard.removePagesAfter(1);
+        wizard.addPage(R.layout.wizard_git);
+        gitLocalUrl = (EditText) wizard.findViewById(R.id.wizard_git_local_url);
+        gitRemoteUrl = (EditText) wizard.findViewById(R.id.wizard_git_remote_url);
+        gitLocalUrl.setText("/sdcard/mobileorg_git_local");
+        gitRemoteUrl.setText("/sdcard/mobileorg_git_remote");
+        pullButton = (Button) wizard.findViewById(R.id.wizard_git_pull_button);
+        doneButton = (Button) findViewById(R.id.wizard_done_button);
+        pullButton.setOnClickListener(new OnClickListener() {
+                @Override
+                    public void onClick(View v) {
+                    pullGit();
+                }
+            });
+        wizard.setNavButtonStateOnPage(1, true, PageFlipView.LAST_PAGE);
+        wizard.setDoneButtonOnClickListener(new FinishWizardButtonListener());
+        wizard.enablePage(1);
+    }
+
     
     void createSSHConfig() {
         wizard.removePagesAfter(1);
@@ -226,7 +261,7 @@ public class WizardActivity extends Activity {
         doneButton = (Button) findViewById(R.id.wizard_done_button);
         webdavLoginButton.setOnClickListener(new OnClickListener() {
                 @Override
-                public void onClick(View v) {
+                    public void onClick(View v) {
                     loginSSH();
                 }
             });
@@ -245,7 +280,7 @@ public class WizardActivity extends Activity {
         doneButton = (Button) findViewById(R.id.wizard_done_button);
         webdavLoginButton.setOnClickListener(new OnClickListener() {
                 @Override
-                public void onClick(View v) {
+                    public void onClick(View v) {
                     loginWebdav();
                 }
             });
@@ -332,6 +367,40 @@ public class WizardActivity extends Activity {
                     }
                 }
     	    });
+    }
+
+    void pullGit() {
+        try {
+            // test whether local repository exists
+            final File local_dir = new File( gitLocalUrl.getText().toString() );
+            // if( local_dir.exists() ) {
+            //     new AlertDialog.Builder(this)
+            //         .setIcon(android.R.drawable.ic_dialog_alert)
+            //         .setTitle(R.string.wizard_git_attention)
+            //         .setMessage(((String) getResources().getString(R.string.wizard_git_directory)) + 
+            //                     local_dir.getAbsolutePath() + 
+            //                     ((String) getResources().getString(R.string.wizard_git_already_exists)) + "\n" + 
+            //                     ((String) getResources().getString(R.string.wizard_git_really_delete_it)))
+            //         .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            //                 @Override
+            //                     public void onClick(DialogInterface dialog, int which) {
+            //                     FileUtils.deleteRecursively( local_dir );
+            //                 }
+            //             })
+            //         .setNegativeButton(R.string.no, null)
+            //         .show();
+            //     if( local_dir.exists() )
+            //         return;
+            // }
+            GitSynchronizer gs = new GitSynchronizer(
+                                                     this, 
+                                                     gitRemoteUrl.getText().toString(),
+                                                     gitLocalUrl.getText().toString());        
+            gs.pull();
+            showToast("Successfully cloned repository!");
+        } catch (Exception e ) {
+            showToast("Pull failed!\n" + e.getLocalizedMessage() );
+        }
     }
 
     void loginSSH() {
@@ -592,7 +661,7 @@ public class WizardActivity extends Activity {
                 editor.putString("scpPass", sshPass.getText().toString());
                 editor.putString("scpHost", sshHost.getText().toString());
                 if (sshPort.getText().toString().trim().equals("")) {
-                editor.putString("scpPort", "22");
+                    editor.putString("scpPort", "22");
                 }
                 else {
                     editor.putString("scpPort", sshPort.getText().toString());
@@ -602,9 +671,14 @@ public class WizardActivity extends Activity {
                 editor.putString("dropboxPath", directoryAdapter.getCheckedDirectory() + "/");
             else if ( syncSource.equals("ubuntu") )
                 editor.putString("ubuntuOnePath", directoryAdapter.getCheckedDirectory() + "/");
-            else if ( syncSource.equals("sdcard") ) 
+            else if ( syncSource.equals("git") ) {
+                editor.putString("gitLocalUrl", gitLocalUrl.getText().toString() + "/");
+                editor.putString("gitRemoteUrl", gitRemoteUrl.getText().toString() + "/");
+            }
+            else if ( syncSource.equals("sdcard") ) { 
                 editor.putString("indexFilePath", directoryAdapter.getCheckedDirectory() );
-            editor.putString("storageMode", "sdcard");
+                editor.putString("storageMode", "sdcard");
+            }
             editor.commit();
             finish();
         }

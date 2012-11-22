@@ -148,6 +148,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
             DefaultHttpClient httpClient = new DefaultHttpClient();
             signRequest(request);
             HttpResponse response = httpClient.execute(request);
+            Log.d("MobileOrg/../UbuntuOneSynchronizer"," response = " + response.getStatusLine().getStatusCode() );
             verifyResponse(response);
             JSONObject fileData = responseToJson(response);
 
@@ -165,20 +166,31 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
 
             signRequest(request);
             response = httpClient.execute(request);
+            Log.d("MobileOrg/../UbuntuOneSynchronizer"," response = " + response.getStatusLine().getStatusCode() );
             verifyResponse(response);
 
+        } catch (IOException e) {
+            Log.e("MobileOrg/../UbuntuOneSynchronizer", "Exception in Ubuntu One PutRemoteFile: " + e.toString());
+            Log.e("MobileOrg/../UbuntuOneSynchronizer", "filename: " + filename);
+            Log.e("MobileOrg/../UbuntuOneSynchronizer", "contents: " + contents);
+            throw e;
         } catch (Exception e) {
-            Log.e("MobileOrg", "Exception in Ubuntu One Put File: " + e.toString());
+            Log.e("MobileOrg/../UbuntuOneSynchronizer", "Exception in Ubuntu One PutRemoteFile: " + e.toString());
+            Log.e("MobileOrg/../UbuntuOneSynchronizer", "filename: " + filename);
+            Log.e("MobileOrg/../UbuntuOneSynchronizer", "contents: " + contents);
         }
     }
 
     public BufferedReader getRemoteFile(String filename) {
+        Log.d("MobileOrg/../UbuntuOneSynchronizer","getRemoteFile(" + filename);
+        String files_url = "";
+        URL url = null;
         try { 
             buildConsumer();
             String latterPart = remoteIndexPath + filename;
             latterPart = latterPart.replaceAll("/{2,}", "/");
-            String files_url = FILES_URL + root_path + latterPart;
-            URL url = new URL(files_url);
+            files_url = FILES_URL + root_path + latterPart;
+            url = new URL(files_url);
             URI uri = new URI(url.getProtocol(), url.getUserInfo(), url.getHost(),
                               url.getPort(), url.getPath(), url.getQuery(), url.getRef());
             url = uri.toURL();
@@ -203,6 +215,12 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
             return new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
         } catch (Exception e) {
             Log.e("MobileOrg", "Exception in Ubuntu One Fetch File: " + e.toString());
+            Log.e("MobileOrg", "  files_url = " + files_url);
+            Log.e("MobileOrg", "  url = " + url);
+            Log.e("MobileOrg", "  remoteIndexPath = " + remoteIndexPath);
+            Log.e("MobileOrg", "  root_path = " + root_path);
+
+
         }
         return null;
     }
@@ -241,6 +259,7 @@ private static final String BASE_TOKEN_NAME = "Ubuntu One @ MobileOrg:";
     }
 
     public void getBaseUser() {
+        Log.d("MobileOrg/../UbuntuOneSynrchronizer","getBaseUser");
 		try {
             buildConsumer();
 			String files_url = FILES_URL;

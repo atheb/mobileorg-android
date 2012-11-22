@@ -215,4 +215,12 @@ public class FileUtils {
 			return null;
 		}
 	}
+
+    public static void deleteRecursively(File dirOrFile) {
+        if( dirOrFile.isDirectory())
+            for( File child : dirOrFile.listFiles() )
+                deleteRecursively(child);
+        dirOrFile.delete();
+    }
+
 }

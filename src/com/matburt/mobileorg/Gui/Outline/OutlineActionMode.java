@@ -133,6 +133,7 @@ public class OutlineActionMode implements ActionMode.Callback {
 		
 		String captureMode = EditActivity.ACTIONMODE_CREATE;
 		if (OrgUtils.useAdvancedCapturing(context)) {
+                    Log.d("MobileOrg/../OutlineActionMode","runCaptureActivity: advanced capturing");
 			captureMode = EditActivity.ACTIONMODE_ADDCHILD;
 		}
 		

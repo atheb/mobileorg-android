@@ -15,6 +15,9 @@ import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+
 import com.matburt.mobileorg.R;
 import com.matburt.mobileorg.Gui.FileDecryptionActivity;
 import com.matburt.mobileorg.Gui.SynchronizerNotification;
@@ -84,8 +87,9 @@ public class Synchronizer {
 	 * file combine their content. This combined version is transfered to the
 	 * remote.
 	 */
-	public void pushCaptures() throws IOException,
-			CertificateException, SSLHandshakeException {
+	private void pushCaptures() throws IOException,
+                                           CertificateException, SSLHandshakeException, GitAPIException, SynchronizeException {
+                Log.d("MobileOrg/.../Synchronizer","pushCaptures");
 		final String filename = CAPTURE_FILE;
 		
 		notify.updateNotification("Uploading captures");
@@ -95,13 +99,18 @@ public class Synchronizer {
 		try {
 			OrgFile file = new OrgFile(filename, resolver);
 			localContents += file.toString(resolver);
-		} catch (OrgFileNotFoundException e) {}
+		} catch (OrgFileNotFoundException e) {
+
+                    Log.e("MobileOrg/../Synchronizer",
+                          "OrgFileNotFoundException while opening capture file: " 
+                          + filename);}
 		
 		localContents += OrgEdit.editsToString(resolver);
+                Log.d("MobileOrg/../Synchronizer","localContents = " + localContents);
+                //DEBUG
+		//if (localContents.equals(""))
+		//	return;
 
-		if (localContents.equals(""))
-			return;
-		String remoteContent = FileUtils.read(syncher.getRemoteFile(filename));
                 // Write backup file
                 String backup_file = "org_mobile_backup.org";
                 String localBackupContent = "";
@@ -122,7 +131,10 @@ public class Synchronizer {
 		
 		try {
 			new OrgFile(filename, resolver).removeFile(resolver);
-		} catch (OrgFileNotFoundException e) {}
+		} catch (OrgFileNotFoundException e) {
+                    Log.e("MobileOrg/../Synchronizer",
+                          "OrgFileNotFoundException while removing: " + filename);
+                }
 
 		resolver.delete(Edits.CONTENT_URI, null, null);
 		resolver.delete(Files.buildFilenameUri(filename), null, null);
@@ -133,7 +145,8 @@ public class Synchronizer {
 	 * host. Using those files, it determines the other files that need updating
 	 * and downloads them.
 	 */
-	public void pull(OrgFileParser parser) throws SSLHandshakeException, CertificateException, IOException {
+	private void pull(OrgFileParser parser) throws SSLHandshakeException, CertificateException, IOException,  GitAPIException, SynchronizeException {
+            Log.d("MobileOrg/.../Synchronizer","pull");
 		HashMap<String,String> remoteChecksums = getAndParseChecksumFile();
 		ArrayList<String> changedFiles = getFilesThatChangedRemotely(remoteChecksums);
 		
@@ -153,7 +166,8 @@ public class Synchronizer {
 	private void pull(OrgFileParser parser, ArrayList<String> filesToGet,
 			HashMap<String, String> filenameMap,
 			HashMap<String, String> remoteChecksums)
-			throws SSLHandshakeException, CertificateException, IOException {
+			throws SSLHandshakeException, CertificateException, IOException,  GitAPIException, SynchronizeException {
+            Log.d("MobileOrg/.../Synchronizer","pull2");
 		final int totalNumberOfFiles = filesToGet.size() + 2;
 		int fileIndex = 1;
 		for (String filename : filesToGet) {
@@ -167,7 +181,8 @@ public class Synchronizer {
 		}
 	}
 
-	private HashMap<String, String> getAndParseIndexFile() throws SSLHandshakeException, CertificateException, IOException {
+	private HashMap<String, String> getAndParseIndexFile() throws SSLHandshakeException, CertificateException, IOException,  GitAPIException, SynchronizeException {
+            Log.d("MobileOrg/.../Synchronizer","getAndParseIndexFile");
 		String remoteIndexContents = FileUtils.read(syncher.getRemoteFile(INDEX_FILE));
 		OrgProviderUtils.setTodos(
 				OrgFileParser.getTodosFromIndex(remoteIndexContents), resolver);
@@ -181,7 +196,8 @@ public class Synchronizer {
 		return filenameMap;
 	}
 	
-	private HashMap<String, String> getAndParseChecksumFile() throws SSLHandshakeException, CertificateException, IOException {
+	private HashMap<String, String> getAndParseChecksumFile() throws SSLHandshakeException, CertificateException, IOException,  GitAPIException, SynchronizeException {
+            Log.d("MobileOrg/.../Synchronizer","getAndParseChecksumFile");
 		String remoteChecksumContents = FileUtils.read(syncher.getRemoteFile("checksums.dat"));
 
 		HashMap<String, String> remoteChecksums = OrgFileParser
@@ -190,6 +206,7 @@ public class Synchronizer {
 	}
 	
 	private ArrayList<String> getFilesThatChangedRemotely(HashMap<String, String> remoteChecksums) {
+            Log.d("MobileOrg/.../Synchronizer","getFilesThatChangedRemotely");
 		HashMap<String, String> localChecksums = OrgProviderUtils.getFileChecksums(resolver);
 		
 		ArrayList<String> filesToGet = new ArrayList<String>();
@@ -207,8 +224,8 @@ public class Synchronizer {
 	}
 	
 	private void getAndParseFile(OrgFile orgFile, OrgFileParser parser)
-			throws CertificateException, IOException {
-		
+			throws CertificateException, IOException,  GitAPIException, SynchronizeException {
+            Log.d("MobileOrg/.../Synchronizer","getAndParseFile");
 		BufferedReader breader = syncher.getRemoteFile(orgFile.filename);
 
 		// TODO Generate checksum of file and compare to remoteChecksum
@@ -268,6 +285,8 @@ public class Synchronizer {
 		} else if (CertificateException.class.isInstance(exception)) {
 			errorMessage = "Certificate Error occured during sync: "
 					+ exception.getLocalizedMessage();
+                } else if( SynchronizeException.class.isInstance(exception)) {
+                    errorMessage = "Synchronize exception: " + exception.getMessage();                
 		} else {
 			errorMessage = "Error: " + exception.getLocalizedMessage();
 		}

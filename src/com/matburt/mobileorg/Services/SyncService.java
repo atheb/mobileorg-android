@@ -17,6 +17,7 @@ import com.matburt.mobileorg.Synchronizers.DropboxSynchronizer;
 import com.matburt.mobileorg.Synchronizers.NullSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SDCardSynchronizer;
 import com.matburt.mobileorg.Synchronizers.SSHSynchronizer;
+import com.matburt.mobileorg.Synchronizers.GitSynchronizer;
 import com.matburt.mobileorg.Synchronizers.Synchronizer;
 import com.matburt.mobileorg.Synchronizers.SynchronizerInterface;
 import com.matburt.mobileorg.Synchronizers.UbuntuOneSynchronizer;
@@ -80,27 +81,28 @@ public class SyncService extends Service implements
 
     public Synchronizer getSynchronizer() {
         SynchronizerInterface synchronizer = null;
-		String syncSource = appSettings.getString("syncSource", "");
-		Context c = getApplicationContext();
+        String syncSource = appSettings.getString("syncSource", "");
+        Context c = getApplicationContext();
 		
-		if (syncSource.equals("webdav"))
-			synchronizer =new WebDAVSynchronizer(c);
-		else if (syncSource.equals("sdcard"))
-			synchronizer = new SDCardSynchronizer(c);
-		else if (syncSource.equals("dropbox"))
-			synchronizer = new DropboxSynchronizer(c);
+        if (syncSource.equals("webdav"))
+            synchronizer =new WebDAVSynchronizer(c);
+        else if (syncSource.equals("sdcard"))
+            synchronizer = new SDCardSynchronizer(c);
+        else if (syncSource.equals("dropbox"))
+            synchronizer = new DropboxSynchronizer(c);
         else if (syncSource.equals("ubuntu")) {
             synchronizer = new UbuntuOneSynchronizer(c);
             ((UbuntuOneSynchronizer)synchronizer).getBaseUser();
-        }
-		else if (syncSource.equals("scp"))
-			synchronizer = new SSHSynchronizer(c);
+        } else if (syncSource.equals("scp"))
+            synchronizer = new SSHSynchronizer(c);
+        else if (syncSource.equals("git"))
+            synchronizer = new GitSynchronizer(c);
         else if (syncSource.equals("null"))
             synchronizer = new NullSynchronizer();
-		else
-			synchronizer = null;
+        else
+            synchronizer = null;
 		
-		return new Synchronizer(c, synchronizer,
+        return new Synchronizer(c, synchronizer,
 				new SynchronizerNotification(c));
     }
 

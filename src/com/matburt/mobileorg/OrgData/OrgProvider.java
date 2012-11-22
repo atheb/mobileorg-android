@@ -9,6 +9,8 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
+import android.util.Log;
+
 import com.matburt.mobileorg.OrgData.OrgContract.Edits;
 import com.matburt.mobileorg.OrgData.OrgContract.Files;
 import com.matburt.mobileorg.OrgData.OrgContract.OrgData;
@@ -80,7 +82,8 @@ public class OrgProvider extends ContentProvider {
 	}
 
 	@Override
-	public Uri insert(Uri uri, ContentValues contentValues) {		
+	public Uri insert(Uri uri, ContentValues contentValues) {
+            Log.d("MobileOrg/../OrgProvider","Inserting to URI: " + uri + "  contentValues = " + contentValues);
 		final String tableName = getTableNameFromUri(uri);
 		
 		if(contentValues == null)
@@ -99,7 +102,7 @@ public class OrgProvider extends ContentProvider {
 
 	
 	@Override
-	public int delete(Uri uri, String selection, String[] selectionArgs) {		
+	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		final SQLiteDatabase db = dbHelper.getWritableDatabase();
 		final SelectionBuilder builder = buildSelectionFromUri(uri);
 		int count = builder.where(selection, selectionArgs).delete(db);
@@ -110,6 +113,7 @@ public class OrgProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
 			String[] selectionArgs) {
+            Log.d("MobileOrg/../OrgProvider","Updating URI: " + uri + "  values = " + values + " selection: " + selection + " selectionArgs = " + selectionArgs);
 		final SQLiteDatabase db = dbHelper.getWritableDatabase();
 		final SelectionBuilder builder = buildSelectionFromUri(uri);
 		int count = builder.where(selection, selectionArgs).update(db, values);

@@ -102,6 +102,7 @@
     <string name="wizard_ubuntuone">an UbuntuOne account</string>
     <string name="wizard_sdcard">my SD card</string>
     <string name="wizard_ssh">an SSH server</string>
+    <string name="wizard_git">a GIT repository</string>
     <string name="wizard_null">nothing (capture only)</string>
     <string name="log_in_to_dropbox">Log in to Dropbox</string>
     <string name="log_in_to_ubuntuone">Log in to Ubuntu One</string>
@@ -111,6 +112,15 @@
     <string name="url">URL</string>
     <string name="wizard_dropbox_email_hint">user@host.com</string>
     <string name="wizard_ubuntu_email_hint">user@host.com</string>
+
+    <string name="wizard_git_access_git_repository">Use Git repository</string>
+    <string name="wizard_git_local_repository">Local Git repository</string>
+    <string name="wizard_git_remote_repository">Remote Git repository</string>
+    <string name="wizard_git_pull">Pull</string>
+    <string name="wizard_git_attention">Attention</string>
+    <string name="wizard_git_directory">Directory</string>
+    <string name="wizard_git_already_exists">already exists.</string>
+    <string name="wizard_git_really_delete_it">Do you really want to DELETE it?</string>
 
     <!-- preference strings -->
     <string name="title_capture_with_timestamp">Capture with timestamp</string>

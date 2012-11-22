@@ -67,16 +67,20 @@ public class EditActivity extends SherlockFragmentActivity implements
 		long node_id = intent.getLongExtra(NODE_ID, -1);	
 		
 		if (this.actionMode == null) {
+                    Log.d("MobileOrg/../EditActivity","initState: actionMode == null");
 			this.node = OrgUtils.getCaptureIntentContents(intent);
 			this.actionMode = ACTIONMODE_CREATE;
 		} else if (this.actionMode.equals(ACTIONMODE_CREATE)) {
+                    Log.d("MobileOrg/../EditActivity","initState: ACTIONMODE_CREATE");
 			this.node = new OrgNode();
 		} else if (this.actionMode.equals(ACTIONMODE_EDIT)) {
+                    Log.d("MobileOrg/../EditActivity","initState: ACTIONMODE_EDIT");
 			try {
 				this.node = new OrgNode(node_id, getContentResolver()).findOriginalNode(resolver);
 				this.nodeOlpPath = node.getOlpId(resolver);
 			} catch (OrgNodeNotFoundException e) {}
 		} else if (this.actionMode.equals(ACTIONMODE_ADDCHILD)) {
+                    Log.d("MobileOrg/../EditActivity","initState: ACTIONMODE_ADDCHILD");
 			this.node = new OrgNode();			
 
 			if(node_id >= 0) {
